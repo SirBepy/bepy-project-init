@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";
 
 const fs = require("fs");
@@ -296,20 +297,6 @@ async function modeSelect() {
 }
 
 // ─── Step functions ────────────────────────────────────────────────────────────
-
-function selfUpdate() {
-  console.log(GREEN + "🚀 Web Project Initializer" + RESET);
-  try {
-    execFileSync("git", ["-C", scriptDir, "pull"], { stdio: "pipe" });
-    console.log(GREEN + "✅ Scripts updated." + RESET);
-  } catch (e) {
-    console.log(
-      YELLOW +
-        "⚠️  Could not reach GitHub — running with local version." +
-        RESET,
-    );
-  }
-}
 
 async function preflight() {
   const entries = fs.readdirSync(".");
@@ -763,7 +750,7 @@ function upgradeFinalize() {
 // ─── Main entry point ──────────────────────────────────────────────────────────
 
 async function main() {
-  selfUpdate();
+  console.log(GREEN + "🚀 Web Project Initializer" + RESET);
   await modeSelect();
 
   if (upgradeMode) {
