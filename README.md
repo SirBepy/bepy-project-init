@@ -25,51 +25,15 @@ For PWA icon generation only:
 
 - `sharp` installed globally: `npm install -g sharp`
 
-## One-time setup
-
-### 1. Clone this repo
-
-```bash
-git clone https://github.com/sirbepy/bepy-project-init ~/scripts
-```
-
-### 2. Make the launcher executable (macOS/Linux)
-
-```bash
-chmod +x ~/scripts/init.sh
-```
-
-### 3. Customize the settings widget
-
-Open `~/scripts/widget/settings.js` and fill in the `AUTHOR` constant at the top:
-
-```js
-const AUTHOR = {
-  name: "SirBepy",
-  github: "https://github.com/sirbepy",
-  youtube: "https://youtube.com/@sirbepy",
-};
-```
-
-This shows up in the About section of the settings panel in every generated project.
-
-## Creating a new project
+## Usage
 
 Navigate to an **empty folder** where you want your project, then run:
 
-**macOS/Linux:**
-
 ```bash
-~/scripts/init.sh
+npx github:sirbepy/bepy-project-init
 ```
 
-**Windows (PowerShell):**
-
-```powershell
-~/scripts/init.ps1
-```
-
-The script auto-updates itself from GitHub on each run, then walks you through:
+No install or setup required. It walks you through:
 
 | Prompt                  | Options                                      |
 | ----------------------- | -------------------------------------------- |
@@ -97,7 +61,7 @@ Pushing to GitHub triggers the included workflow which deploys to GitHub Pages a
 
 ## Upgrading an existing project
 
-Run the script from inside an existing project folder and choose option `2`. It will:
+Run from inside an existing project folder and choose option `2`. It will:
 
 1. Check that git is initialized and offer to commit any uncommitted changes first
 2. Detect what's missing: themes, settings widget tag, `build-info.js`, GitHub Actions workflow
@@ -156,26 +120,27 @@ Every project gets a floating ⚙️ button (top-right) that opens a settings pa
 
 - **App** — project name, description, and last build time
 - **Theme** — buttons for each theme in `assets/themes/`
-- **About** — your name, links to GitHub and YouTube (from `AUTHOR` in `widget/settings.js`)
+- **About** — links to GitHub and YouTube
 - **Feedback** — link to a Google Form
+
+The widget is loaded live from GitHub Pages, so updating `widget/settings.js` in this repo is reflected in every generated project automatically.
 
 Build time is populated by the GitHub Actions workflow via `build-info.js`. In local dev it shows "Local build".
 
-## Toolkit structure
+## Repo structure
 
 ```
-~/scripts/
-  init.sh              ← Bash launcher (macOS/Linux)
-  init.ps1             ← PowerShell launcher (Windows)
+bepy-project-init/
   init.js              ← Core logic (Node.js)
   svg-to-png.js        ← PWA icon generator
+  package.json
   themes/
     theme-void.css
     theme-glacier.css
     theme-cosmo.css
     theme-nebula.css
   widget/
-    settings.js        ← Settings panel widget (edit AUTHOR here)
+    settings.js        ← Settings panel widget (served via GitHub Pages)
   templates/
     vite/              ← Templates for Vite vanilla projects
     react/             ← Templates for React projects
