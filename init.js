@@ -207,11 +207,8 @@ function detectMissing() {
     }
   }
 
-  if (
-    !fs.existsSync(path.resolve("build-info.js")) &&
-    !fs.existsSync(path.resolve("src/build-info.js"))
-  ) {
-    missing.push("build-info.js");
+  if (!fs.existsSync(path.resolve("assets/scripts/build-info.js"))) {
+    missing.push("assets/scripts/build-info.js");
   }
 
   const workflowsDir = path.resolve(".github/workflows");
@@ -256,7 +253,7 @@ function patchWorkflow(workflowPath) {
 }
 
 function mergeGitignore(destPath) {
-  const templatePath = path.join(scriptDir, "templates", ".gitignore");
+  const templatePath = path.join(scriptDir, "templates", "gitignore");
   const templateContent = fs.readFileSync(templatePath, "utf8");
   const existed = fs.existsSync(destPath);
   const existingContent = existed ? fs.readFileSync(destPath, "utf8") : "";
@@ -402,7 +399,11 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/themes"));
 
-    copyTemplate("build-info.js", path.resolve("build-info.js"), {});
+    const assetsScriptsExisted = fs.existsSync("assets/scripts");
+    fs.mkdirSync("assets/scripts", { recursive: true });
+    if (!assetsScriptsExisted) track(path.resolve("assets/scripts"));
+
+    copyTemplate("build-info.js", path.resolve("assets/scripts/build-info.js"), {});
     injectIntoHtml(path.resolve("index.html"), {
       googleFonts: true,
       voidTheme: true,
@@ -442,7 +443,11 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/themes"));
 
-    copyTemplate("build-info.js", path.resolve("src/build-info.js"), {});
+    const reactScriptsExisted = fs.existsSync("assets/scripts");
+    fs.mkdirSync("assets/scripts", { recursive: true });
+    if (!reactScriptsExisted) track(path.resolve("assets/scripts"));
+
+    copyTemplate("build-info.js", path.resolve("assets/scripts/build-info.js"), {});
     injectIntoHtml(path.resolve("index.html"), {
       googleFonts: true,
       voidTheme: true,
@@ -708,10 +713,8 @@ async function upgradePatch() {
     });
   }
 
-  const buildInfoDest = fs.existsSync(path.resolve("src"))
-    ? path.resolve("src/build-info.js")
-    : path.resolve("build-info.js");
-  copyTemplate("build-info.js", buildInfoDest, {});
+  fs.mkdirSync(path.resolve("assets/scripts"), { recursive: true });
+  copyTemplate("build-info.js", path.resolve("assets/scripts/build-info.js"), {});
 
   const workflowsDir = path.resolve(".github/workflows");
   if (fs.existsSync(workflowsDir)) {

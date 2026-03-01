@@ -5,7 +5,7 @@
 //
 // HOW TO USE IN A NEW PROJECT:
 //
-// 1. Copy this file into your project root (or src/ for React).
+// 1. Copy this file into assets/scripts/ in your project.
 //
 // 2. Add the following step to your GitHub Actions workflow,
 //    placed *before* "Setup Pages" for vanilla, or before your
@@ -24,13 +24,13 @@
 // 3a. Vanilla HTML — include this script tag (no other setup needed,
 //     it logs to console automatically when the page loads):
 //
-//       <script type="module" src="build-info.js"></script>
+//       <script type="module" src="/assets/scripts/build-info.js"></script>
 //
 // 3b. React/Vite — import it once in your entry point (main.jsx / index.jsx).
 //     It logs automatically on import. Use the named exports if you also
 //     want to display the values in a component:
 //
-//       import { PROJECT_NAME, BUILD_TIMESTAMP, getRelativeTime } from './build-info';
+//       import { PROJECT_NAME, BUILD_TIMESTAMP, getRelativeTime } from '../assets/scripts/build-info';
 //
 // NOTE: The placeholders below stay as-is in source. The workflow replaces
 // them at deploy time only, so locally you'll see the raw placeholder strings.
