@@ -17,6 +17,7 @@
 
   let elPanel, elBackdrop, elCogBtn, elCloseBtn;
   let elAppName, elAppDesc, elBuildTime, elThemeBtns;
+  let _savedBodyOverflow = null;
 
   // ─── 1. CSS Injection ─────────────────────────────────────────────────────
 
@@ -130,10 +131,10 @@
     }
     const diff = Date.now() - new Date(utcDateString).getTime();
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 1) return "< 1 min ago";
-    if (minutes < 60) return minutes + " min ago";
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return minutes + " minutes ago";
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + " hr ago";
+    if (hours < 24) return hours + " hours ago";
     const days = Math.floor(hours / 24);
     return days + " days ago";
   }
@@ -263,13 +264,19 @@
   function openPanel() {
     elPanel.classList.add("tl-open");
     elBackdrop.classList.add("tl-open");
-    if (window.innerWidth <= 480) document.body.style.overflow = "hidden";
+    if (window.innerWidth <= 480) {
+      _savedBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+    }
   }
 
   function closePanel() {
     elPanel.classList.remove("tl-open");
     elBackdrop.classList.remove("tl-open");
-    document.body.style.overflow = "";
+    if (_savedBodyOverflow !== null) {
+      document.body.style.overflow = _savedBodyOverflow;
+      _savedBodyOverflow = null;
+    }
   }
 
   function wireEvents() {
@@ -302,12 +309,16 @@
         document.head.appendChild(el);
       }
       localStorage.setItem(LS_KEY, name);
+      const prev = elThemeBtns.querySelector(".tl-theme-error");
+      if (prev) prev.remove();
     } catch (_) {
-      elThemeBtns.innerHTML = "";
-      const err = document.createElement("div");
-      err.className = "tl-theme-error";
+      let err = elThemeBtns.querySelector(".tl-theme-error");
+      if (!err) {
+        err = document.createElement("div");
+        err.className = "tl-theme-error";
+        elThemeBtns.appendChild(err);
+      }
       err.textContent = '⚠ Could not load theme "' + name + '".';
-      elThemeBtns.appendChild(err);
     }
   }
 
@@ -362,7 +373,17 @@
         }
       }
     } catch (_) {}
-    renderThemeButtons(FALLBACK_THEMES);
+    const available = (
+      await Promise.all(
+        FALLBACK_THEMES.map(function (name) {
+          return fetch("/assets/themes/theme-" + name + ".css").then(
+            function (r) { return r.ok ? name : null; },
+            function () { return null; }
+          );
+        })
+      )
+    ).filter(Boolean);
+    renderThemeButtons(available);
   }
 
   // ─── 8. Restore saved theme (fire-and-forget) ─────────────────────────────

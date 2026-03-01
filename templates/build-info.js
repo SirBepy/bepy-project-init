@@ -39,6 +39,12 @@
 export const BUILD_TIMESTAMP = "BUILD_TIMESTAMP_PLACEHOLDER";
 export const PROJECT_NAME = "PROJECT_NAME_PLACEHOLDER";
 
+// Expose globals for settings.js widget (reads window.* from plain script tag)
+if (typeof window !== "undefined") {
+  window.BUILD_TIMESTAMP = BUILD_TIMESTAMP;
+  window.PROJECT_NAME = PROJECT_NAME;
+}
+
 export function getRelativeTime(utcDateString) {
   const buildDate = new Date(utcDateString);
   const now = new Date();

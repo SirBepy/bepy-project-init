@@ -21,6 +21,8 @@ let setupPwa = false;
 let themeColor = "";
 let createdFiles = [];
 let preExistingFiles = new Set();
+let upgradeMode = false;
+let projectDescription = "";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -118,6 +120,181 @@ function cleanup() {
   }
 }
 
+// ─── New utility functions ─────────────────────────────────────────────────────
+
+function downloadThemes(destDir) {
+  const themes = ["void", "glacier", "cosmo", "nebula"];
+  for (const theme of themes) {
+    const localPath = path.join(scriptDir, "themes", `theme-${theme}.css`);
+    const destPath = path.join(destDir, `theme-${theme}.css`);
+    if (fs.existsSync(localPath)) {
+      fs.copyFileSync(localPath, destPath);
+    } else {
+      try {
+        execSync(
+          `curl -fsSL "https://sirbepy.github.io/bepy-project-init/themes/theme-${theme}.css" -o "${destPath}"`,
+          { stdio: "pipe" },
+        );
+      } catch (e) {
+        console.log(
+          YELLOW + `⚠️  Could not download theme-${theme}.css` + RESET,
+        );
+      }
+    }
+  }
+}
+
+function injectIntoHtml(htmlPath, options = {}) {
+  let html = fs.readFileSync(htmlPath, "utf8");
+
+  if (options.googleFonts && !html.includes("fonts.googleapis.com")) {
+    const fontsLink =
+      '    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=Fredoka:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">\n';
+    html = html.replace("</head>", fontsLink + "  </head>");
+  }
+
+  if (options.voidTheme) {
+    html = html.replace(/<style id="active-theme">[\s\S]*?<\/style>/, "");
+    const voidCssPath = path.join(scriptDir, "themes", "theme-void.css");
+    if (fs.existsSync(voidCssPath)) {
+      const voidCss = fs.readFileSync(voidCssPath, "utf8");
+      const styleBlock =
+        '    <style id="active-theme">\n' + voidCss + "\n    </style>\n";
+      html = html.replace("</head>", styleBlock + "  </head>");
+    }
+  }
+
+  if (options.widgetTag && !html.includes("sirbepy.github.io")) {
+    const widgetScript =
+      '    <script src="https://sirbepy.github.io/bepy-project-init/widget/settings.js"></script>\n';
+    html = html.replace("</body>", widgetScript + "  </body>");
+  }
+
+  if (options.pwaManifest && !html.includes("manifest.json")) {
+    const pwaTags =
+      '    <link rel="manifest" href="/manifest.json">\n' +
+      '    <meta name="theme-color" content="' +
+      options.pwaThemeColor +
+      '">\n';
+    html = html.replace("</head>", pwaTags + "  </head>");
+  }
+
+  fs.writeFileSync(htmlPath, html);
+}
+
+const isWorkflow = (f) => f.endsWith(".yml") || f.endsWith(".yaml");
+
+function detectMissing() {
+  const missing = [];
+
+  const themesDir = path.resolve("assets/themes");
+  if (
+    !fs.existsSync(themesDir) ||
+    fs.readdirSync(themesDir).filter((f) => f.endsWith(".css")).length === 0
+  ) {
+    missing.push("assets/themes/*.css");
+  }
+
+  const indexPath = path.resolve("index.html");
+  if (fs.existsSync(indexPath)) {
+    const indexHtml = fs.readFileSync(indexPath, "utf8");
+    if (!indexHtml.includes("sirbepy.github.io")) {
+      missing.push("widget script tag in index.html");
+    }
+    if (!indexHtml.includes("active-theme")) {
+      missing.push('<style id="active-theme"> in index.html');
+    }
+  }
+
+  if (
+    !fs.existsSync(path.resolve("build-info.js")) &&
+    !fs.existsSync(path.resolve("src/build-info.js"))
+  ) {
+    missing.push("build-info.js");
+  }
+
+  const workflowsDir = path.resolve(".github/workflows");
+  if (
+    !fs.existsSync(workflowsDir) ||
+    fs.readdirSync(workflowsDir).filter(isWorkflow).length === 0
+  ) {
+    missing.push(".github/workflows/*.yml");
+  }
+
+  return missing;
+}
+
+function patchWorkflow(workflowPath) {
+  let content = fs.readFileSync(workflowPath, "utf8");
+  if (content.includes("BUILD_TIMESTAMP_PLACEHOLDER")) return;
+
+  const injectStep =
+    "      - name: Inject build info\n" +
+    "        run: |\n" +
+    '          BUILD_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")\n' +
+    '          PROJECT=$(basename "$GITHUB_REPOSITORY")\n' +
+    '          BUILD_INFO=$(find . -name "build-info.js" -not -path "./.git/*")\n' +
+    '          sed -i "s|BUILD_TIMESTAMP_PLACEHOLDER|$BUILD_TIME|g" $BUILD_INFO\n' +
+    '          sed -i "s|PROJECT_NAME_PLACEHOLDER|$PROJECT|g" $BUILD_INFO\n';
+
+  if (content.includes("actions/upload-pages-artifact")) {
+    content = content.replace(
+      /(\s*- uses: actions\/upload-pages-artifact)/,
+      "\n" + injectStep + "$1",
+    );
+  } else if (content.includes("- run: npm ci")) {
+    content = content.replace(
+      "- run: npm ci",
+      injectStep + "      - run: npm ci",
+    );
+  } else {
+    content = content + "\n" + injectStep;
+  }
+
+  fs.writeFileSync(workflowPath, content);
+}
+
+function mergeGitignore(destPath) {
+  const templatePath = path.join(scriptDir, "templates", ".gitignore");
+  const templateContent = fs.readFileSync(templatePath, "utf8");
+  const existed = fs.existsSync(destPath);
+  const existingContent = existed ? fs.readFileSync(destPath, "utf8") : "";
+
+  const templateLines = templateContent.split("\n").map((l) => l.trim());
+  const existingLines = existingContent.split("\n").map((l) => l.trim());
+
+  const missingLines = templateLines.filter(
+    (l) => l.length > 0 && !l.startsWith("#") && !existingLines.includes(l),
+  );
+
+  if (!existed) {
+    fs.writeFileSync(destPath, templateContent);
+    track(destPath);
+  } else if (missingLines.length > 0) {
+    const merged =
+      existingContent.trimEnd() +
+      "\n\n# Added by bepy-project-init\n" +
+      missingLines.join("\n") +
+      "\n";
+    fs.writeFileSync(destPath, merged);
+  }
+}
+
+async function modeSelect() {
+  const choice = await prompt(
+    "What do you want to do? (1) Create new project  (2) Upgrade existing project",
+    "",
+    (v) => {
+      if (v !== "1" && v !== "2") {
+        console.log(RED + "Invalid choice. Enter 1 or 2." + RESET);
+        return false;
+      }
+      return true;
+    },
+  );
+  upgradeMode = choice === "2";
+}
+
 // ─── Step functions ────────────────────────────────────────────────────────────
 
 function selfUpdate() {
@@ -165,6 +342,7 @@ async function stepProjectName() {
     }
   }
   projectName = name;
+  projectDescription = await prompt("Project description? (optional)", "");
 }
 
 async function stepFramework() {
@@ -231,7 +409,18 @@ function stepScaffold() {
     fs.mkdirSync("assets/images", { recursive: true });
     if (!assetsImagesExisted) track(path.resolve("assets/images"));
 
+    const assetsThemesExisted = fs.existsSync("assets/themes");
+    fs.mkdirSync("assets/themes", { recursive: true });
+    if (!assetsThemesExisted) track(path.resolve("assets/themes"));
+    console.log(YELLOW + "🎨 Downloading themes..." + RESET);
+    downloadThemes(path.resolve("assets/themes"));
+
     copyTemplate("build-info.js", path.resolve("build-info.js"), {});
+    injectIntoHtml(path.resolve("index.html"), {
+      googleFonts: true,
+      voidTheme: true,
+      widgetTag: true,
+    });
   } else {
     // React cleanup
     fs.rmSync("src/App.css", { force: true });
@@ -260,7 +449,18 @@ function stepScaffold() {
     fs.mkdirSync("assets/images", { recursive: true });
     if (!reactImagesExisted) track(path.resolve("assets/images"));
 
+    const reactThemesExisted = fs.existsSync("assets/themes");
+    fs.mkdirSync("assets/themes", { recursive: true });
+    if (!reactThemesExisted) track(path.resolve("assets/themes"));
+    console.log(YELLOW + "🎨 Downloading themes..." + RESET);
+    downloadThemes(path.resolve("assets/themes"));
+
     copyTemplate("build-info.js", path.resolve("src/build-info.js"), {});
+    injectIntoHtml(path.resolve("index.html"), {
+      googleFonts: true,
+      voidTheme: true,
+      widgetTag: true,
+    });
   }
 
   // Both frameworks
@@ -273,6 +473,15 @@ function stepScaffold() {
     path.resolve(".github/workflows/deploy.yml"),
     {},
   );
+
+  try {
+    const pkgPath = path.resolve("package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    pkg.description = projectDescription;
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+  } catch (e) {
+    // package.json may not exist yet or may be malformed
+  }
 
   console.log(GREEN + "✅ Project scaffolded." + RESET);
 }
@@ -367,18 +576,10 @@ async function stepPwa() {
   });
 
   // Inject PWA tags into index.html
-  const indexPath = path.resolve("index.html");
-  const indexHtml = fs.readFileSync(indexPath, "utf8");
-  const pwaTags =
-    '    <link rel="manifest" href="/manifest.json">\n' +
-    '    <meta name="theme-color" content="' +
-    themeColor +
-    '">\n';
-  assertSafeToOverwrite(indexPath);
-  fs.writeFileSync(
-    indexPath,
-    indexHtml.replace("</head>", pwaTags + "  </head>"),
-  );
+  injectIntoHtml(path.resolve("index.html"), {
+    pwaManifest: true,
+    pwaThemeColor: themeColor,
+  });
 
   execSync("npm install -D vite-plugin-pwa", { stdio: "inherit" });
 
@@ -398,11 +599,12 @@ function stepFinalize() {
   copyTemplate("README.md", path.resolve("README.md"), {
     PROJECT_NAME: projectName,
     FRAMEWORK: framework === "vite" ? "Vite" : "React",
+    PROJECT_DESCRIPTION: projectDescription,
   });
 
   console.log(YELLOW + "🔧 Initializing git..." + RESET);
   execSync("git init", { stdio: "inherit" });
-  copyTemplate(".gitignore", path.resolve(".gitignore"), {});
+  mergeGitignore(path.resolve(".gitignore"));
   execSync("git add .", { stdio: "inherit" });
   execSync('git commit -m "chore: initial project setup"', {
     stdio: "inherit",
@@ -431,10 +633,159 @@ function stepFinalize() {
   );
 }
 
+// ─── Upgrade mode functions ────────────────────────────────────────────────────
+
+async function upgradeGitSafety() {
+  try {
+    execSync("git rev-parse --git-dir", { stdio: "pipe" });
+  } catch (e) {
+    console.error(
+      RED + "❌ Not a git repository. Please initialize git first." + RESET,
+    );
+    process.exit(1);
+  }
+
+  const status = execSync("git status --porcelain", { encoding: "utf8" });
+  if (status.trim().length > 0) {
+    console.log(YELLOW + "⚠️  You have uncommitted changes:" + RESET);
+    console.log(status);
+    const answer = await prompt(
+      'Commit as "Clean repo before doing bepy-project-init"? (y/n)',
+      "n",
+    );
+    if (answer !== "y") {
+      console.log("Aborting. Please commit or stash your changes first.");
+      process.exit(0);
+    }
+    execSync("git add .", { stdio: "inherit" });
+    execSync('git commit -m "Clean repo before doing bepy-project-init"', {
+      stdio: "inherit",
+    });
+  }
+}
+
+async function upgradeDetect() {
+  let renamed = false;
+  const indexPath = path.resolve("index.html");
+  if (!fs.existsSync(indexPath)) {
+    const htmlFiles = fs.readdirSync(".").filter((f) => f.endsWith(".html"));
+    if (htmlFiles.length === 1) {
+      console.log(YELLOW + `Renaming ${htmlFiles[0]} → index.html` + RESET);
+      fs.renameSync(htmlFiles[0], "index.html");
+      renamed = true;
+    } else if (htmlFiles.length > 1) {
+      console.log(YELLOW + "Multiple HTML files found:" + RESET);
+      htmlFiles.forEach((f, i) => console.log(`  (${i + 1}) ${f}`));
+      const choice = await prompt(
+        "Which file is your entry point? (number)",
+        "1",
+      );
+      const chosen = htmlFiles[parseInt(choice, 10) - 1] || htmlFiles[0];
+      console.log(YELLOW + `Renaming ${chosen} → index.html` + RESET);
+      fs.renameSync(chosen, "index.html");
+      renamed = true;
+    } else {
+      console.log(
+        YELLOW + "No index.html found and no HTML files to rename." + RESET,
+      );
+    }
+  }
+
+  const missing = detectMissing();
+
+  if (missing.length === 0 && !renamed) {
+    console.log(
+      GREEN + "✅ Nothing to upgrade — project is up to date." + RESET,
+    );
+    process.exit(0);
+  }
+
+  console.log(YELLOW + "The following items will be added:" + RESET);
+  for (const item of missing) {
+    console.log("  • " + item);
+  }
+}
+
+async function upgradePatch() {
+  const themesDir = path.resolve("assets/themes");
+  fs.mkdirSync(themesDir, { recursive: true });
+  console.log(YELLOW + "🎨 Downloading themes..." + RESET);
+  downloadThemes(themesDir);
+
+  const indexPath = path.resolve("index.html");
+  if (fs.existsSync(indexPath)) {
+    injectIntoHtml(indexPath, {
+      googleFonts: true,
+      voidTheme: true,
+      widgetTag: true,
+    });
+  }
+
+  const buildInfoDest = fs.existsSync(path.resolve("src"))
+    ? path.resolve("src/build-info.js")
+    : path.resolve("build-info.js");
+  copyTemplate("build-info.js", buildInfoDest, {});
+
+  const workflowsDir = path.resolve(".github/workflows");
+  if (fs.existsSync(workflowsDir)) {
+    const workflows = fs.readdirSync(workflowsDir).filter(isWorkflow);
+    if (workflows.length > 0) {
+      patchWorkflow(path.join(workflowsDir, workflows[0]));
+    } else {
+      copyTemplate("deploy.yml", path.join(workflowsDir, "deploy.yml"), {});
+    }
+  } else {
+    fs.mkdirSync(workflowsDir, { recursive: true });
+    copyTemplate("deploy.yml", path.join(workflowsDir, "deploy.yml"), {});
+  }
+
+  // Merge .gitignore (additive — only add missing lines, never remove)
+  mergeGitignore(path.resolve(".gitignore"));
+  console.log(GREEN + "✅ .gitignore updated." + RESET);
+}
+
+function upgradeFinalize() {
+  execSync("git add .", { stdio: "inherit" });
+  execSync('git commit -m "chore: apply bepy-project-init upgrade"', {
+    stdio: "inherit",
+  });
+  console.log(
+    GREEN +
+      "✅ Upgrade complete!\n" +
+      "\n" +
+      "Next steps:\n" +
+      "  npm run dev\n" +
+      "  Push to GitHub to trigger deployment" +
+      RESET,
+  );
+}
+
 // ─── Main entry point ──────────────────────────────────────────────────────────
 
 async function main() {
   selfUpdate();
+  await modeSelect();
+
+  if (upgradeMode) {
+    try {
+      await upgradeGitSafety();
+      await upgradeDetect();
+      await upgradePatch();
+      upgradeFinalize();
+    } catch (err) {
+      rl.close();
+      console.error(RED + "❌ Error during upgrade: " + err.message + RESET);
+      console.log(
+        YELLOW +
+          "💡 To undo: git reset --hard HEAD~1 (or HEAD~2 if cleanup commit was made)" +
+          RESET,
+      );
+      process.exit(1);
+    }
+    return;
+  }
+
+  // Create path (unchanged)
   await preflight();
   await stepProjectName();
   snapshotPreExisting();
