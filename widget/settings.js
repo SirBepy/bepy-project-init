@@ -295,7 +295,7 @@
 
   async function applyTheme(name) {
     try {
-      const res = await fetch("/assets/themes/theme-" + name + ".css");
+      const res = await fetch("/assets/styles/themes/theme-" + name + ".css");
       if (!res.ok) throw new Error("fetch failed");
       const css = await res.text();
       let el = document.getElementById("tl-active-theme");
@@ -356,7 +356,7 @@
 
   async function loadThemeList() {
     try {
-      const res = await fetch("/assets/themes/");
+      const res = await fetch("/assets/styles/themes/");
       if (res.ok) {
         const html = await res.text();
         const matches = html.match(/theme-([a-z0-9-]+)\.css/gi) || [];
@@ -375,7 +375,7 @@
     const available = (
       await Promise.all(
         FALLBACK_THEMES.map(function (name) {
-          return fetch("/assets/themes/theme-" + name + ".css").then(
+          return fetch("/assets/styles/themes/theme-" + name + ".css").then(
             function (r) {
               return r.ok ? name : null;
             },
@@ -393,7 +393,7 @@
 
   function restoreSavedTheme() {
     const saved = localStorage.getItem(LS_KEY) || "void";
-    fetch("/assets/themes/theme-" + saved + ".css")
+    fetch("/assets/styles/themes/theme-" + saved + ".css")
       .then(function (r) {
         return r.ok ? r.text() : Promise.reject();
       })

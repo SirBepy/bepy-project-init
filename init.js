@@ -277,24 +277,28 @@ function migrateLooseFiles() {
   fs.mkdirSync(path.resolve("assets/scripts"), { recursive: true });
   fs.mkdirSync(path.resolve("assets/styles"), { recursive: true });
 
-  function moveFile(src, destDir, label) {
+  const moves = [];
+
+  function moveFile(src, destDir, oldRelPath) {
     const name = path.basename(src);
     const dest = path.resolve(destDir, name);
+    const newRelPath = destDir + "/" + name;
     if (!fs.existsSync(dest)) {
       fs.renameSync(src, dest);
-      console.log(YELLOW + `📁 Moved ${label}${name} → ${destDir}/${name}` + RESET);
+      moves.push({ old: oldRelPath, new: newRelPath });
+      console.log(YELLOW + `📁 Moved ${oldRelPath} → ${newRelPath}` + RESET);
     }
   }
 
   if (fs.existsSync("assets")) {
     for (const entry of fs.readdirSync("assets", { withFileTypes: true })) {
       if (!entry.isFile()) continue;
-      const src = path.resolve("assets", entry.name);
       const name = entry.name;
+      const src = path.resolve("assets", name);
       if (name.endsWith(".js")) {
-        moveFile(src, "assets/scripts", "assets/");
+        moveFile(src, "assets/scripts", "assets/" + name);
       } else if (name.endsWith(".css") || name.endsWith(".scss")) {
-        moveFile(src, "assets/styles", "assets/");
+        moveFile(src, "assets/styles", "assets/" + name);
       }
     }
   }
@@ -305,10 +309,24 @@ function migrateLooseFiles() {
     if (name.startsWith(".") || CONFIG_RE.test(name) || SW_RE.test(name)) continue;
     const src = path.resolve(name);
     if (name.endsWith(".js")) {
-      moveFile(src, "assets/scripts", "");
+      moveFile(src, "assets/scripts", name);
     } else if (name.endsWith(".css") || name.endsWith(".scss")) {
-      moveFile(src, "assets/styles", "");
+      moveFile(src, "assets/styles", name);
     }
+  }
+
+  if (moves.length === 0) return;
+
+  const indexPath = path.resolve("index.html");
+  if (fs.existsSync(indexPath)) {
+    let html = fs.readFileSync(indexPath, "utf8");
+    for (const move of moves) {
+      html = html.replaceAll("/" + move.old, "/" + move.new);
+      html = html.replaceAll('"' + move.old, '"' + move.new);
+      html = html.replaceAll("'" + move.old, "'" + move.new);
+    }
+    fs.writeFileSync(indexPath, html);
+    console.log(YELLOW + "✏️  Updated index.html references" + RESET);
   }
 }
 
