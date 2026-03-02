@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joe's Styleguide Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&family=Bricolage+Grotesque:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=Geist+Mono:wght@400;500;600&family=Manrope:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Oxanium:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       THEMES
+    ============================================================ */
+
+    /* --- THEME 1: Nebula (based on portfolio) --- */
+    [data-theme="nebula"] {
+      --color-primary: #ee75f4;
+      --color-secondary: #9487ff;
+      --color-accent: #ee75f4;
+      --color-background: #252e5c;
+      --color-surface: #354076;
+      --color-surface-alt: #3b467f;
+      --color-text: #f1f5f9;
+      --color-text-muted: #94a3b8;
+      --color-border: #334155;
+      --color-success: #10b981;
+      --color-info: #3b82f6;
+      --font-heading: 'Fredoka', system-ui, sans-serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #4b589c;
+      --radius-card: 12px;
+      --radius-badge: 9999px;
+      --shadow-card: 0 4px 6px -1px rgba(0,0,0,0.2);
+    }
+
+    /* --- THEME 2: Dusk — neutral/clean, soft lavender, medium dark --- */
+    [data-theme="dusk"] {
+      --color-primary: #b48eff;
+      --color-secondary: #7eb8ff;
+      --color-accent: #b48eff;
+      --color-background: #1c1b2e;
+      --color-surface: #252440;
+      --color-surface-alt: #2c2b4a;
+      --color-text: #ece9ff;
+      --color-text-muted: #8b87b8;
+      --color-border: #38365a;
+      --color-success: #7af0c0;
+      --color-info: #7eb8ff;
+      --font-heading: 'Manrope', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #2e2c52;
+      --radius-card: 10px;
+      --radius-badge: 6px;
+      --shadow-card: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    /* --- THEME 3: Prism — sharp/geometric, violet, medium dark --- */
+    [data-theme="prism"] {
+      --color-primary: #c084fc;
+      --color-secondary: #818cf8;
+      --color-accent: #c084fc;
+      --color-background: #18172a;
+      --color-surface: #211f38;
+      --color-surface-alt: #272545;
+      --color-text: #f0eeff;
+      --color-text-muted: #7b78a8;
+      --color-border: #33305a;
+      --color-success: #86efac;
+      --color-info: #818cf8;
+      --font-heading: 'Space Grotesk', system-ui, sans-serif;
+      --font-body: 'Space Grotesk', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #27244a;
+      --radius-card: 6px;
+      --radius-badge: 4px;
+      --shadow-card: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    /* --- THEME 4: Cosmo — Fredoka-friendly, warm violet, medium dark --- */
+    [data-theme="cosmo"] {
+      --color-primary: #d8a4ff;
+      --color-secondary: #a5b4fc;
+      --color-accent: #d8a4ff;
+      --color-background: #201828;
+      --color-surface: #2c2038;
+      --color-surface-alt: #352744;
+      --color-text: #f5eeff;
+      --color-text-muted: #9b88bb;
+      --color-border: #412e58;
+      --color-success: #86efac;
+      --color-info: #a5b4fc;
+      --font-heading: 'Fredoka', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #301e45;
+      --radius-card: 16px;
+      --radius-badge: 9999px;
+      --shadow-card: 0 4px 20px rgba(0,0,0,0.25);
+    }
+
+    /* --- THEME 5: Slate — cool grey-violet, barely tinted bg, periwinkle accent --- */
+    [data-theme="slate"] {
+      --color-primary: #a09efc;
+      --color-secondary: #7eb3ff;
+      --color-accent: #a09efc;
+      --color-background: #191921;
+      --color-surface: #21212e;
+      --color-surface-alt: #28283a;
+      --color-text: #e8e7f5;
+      --color-text-muted: #7a79a0;
+      --color-border: #313050;
+      --color-success: #7af0c0;
+      --color-info: #7eb3ff;
+      --font-heading: 'Manrope', system-ui, sans-serif;
+      --font-body: 'Manrope', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #252438;
+      --radius-card: 10px;
+      --radius-badge: 6px;
+      --shadow-card: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    /* --- THEME 6: Haze — warmest of the set, dusty violet bg, soft lilac accent --- */
+    [data-theme="haze"] {
+      --color-primary: #c4a8ff;
+      --color-secondary: #9eb5ff;
+      --color-accent: #c4a8ff;
+      --color-background: #1e1a2a;
+      --color-surface: #272336;
+      --color-surface-alt: #2e2940;
+      --color-text: #ede8ff;
+      --color-text-muted: #887faa;
+      --color-border: #3a3354;
+      --color-success: #7af0c0;
+      --color-info: #9eb5ff;
+      --font-heading: 'Manrope', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #2c2645;
+      --radius-card: 10px;
+      --radius-badge: 8px;
+      --shadow-card: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    /* --- THEME 7: Void — most stripped back, near-neutral bg, electric violet pop --- */
+    [data-theme="void"] {
+      --color-primary: #9d7dfc;
+      --color-secondary: #6e8fff;
+      --color-accent: #9d7dfc;
+      --color-background: #16151f;
+      --color-surface: #1e1d2b;
+      --color-surface-alt: #242334;
+      --color-text: #e2e0f0;
+      --color-text-muted: #6b6990;
+      --color-border: #2d2c44;
+      --color-success: #7af0c0;
+      --color-info: #6e8fff;
+      --font-heading: 'Manrope', system-ui, sans-serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #22213a;
+      --radius-card: 10px;
+      --radius-badge: 6px;
+      --shadow-card: 0 4px 16px rgba(0,0,0,0.35);
+    }
+
+    /* --- THEME 3: Glacier --- */
+    [data-theme="glacier"] {
+      --color-primary: #5bf5d8;
+      --color-secondary: #5bcaf5;
+      --color-accent: #5bf5d8;
+      --color-background: #07101a;
+      --color-surface: #0d1f2e;
+      --color-surface-alt: #102433;
+      --color-text: #e0f2fe;
+      --color-text-muted: #5b8aa8;
+      --color-border: #1a3a4f;
+      --color-success: #5bf5d8;
+      --color-info: #5bcaf5;
+      --font-heading: 'Bricolage Grotesque', system-ui, sans-serif;
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+      --badge-tech-bg: #0d2a3a;
+      --radius-card: 16px;
+      --radius-badge: 9999px;
+      --shadow-card: 0 4px 24px rgba(91,245,216,0.07);
+    }
+
+
+
+    /* ============================================================
+       BASE RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 1rem;
+      --spacing-md: 1.5rem;
+      --spacing-lg: 2rem;
+      --spacing-xl: 3rem;
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* ============================================================
+       THEME SWITCHER
+    ============================================================ */
+    .theme-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0.75rem var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .theme-bar-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    .theme-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .theme-btn {
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      border: 1px solid var(--color-border);
+      background: transparent;
+      color: var(--color-text-muted);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .theme-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .theme-btn.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-background);
+      font-weight: 700;
+    }
+
+    .theme-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--color-border);
+      margin: 0 0.25rem;
+      flex-shrink: 0;
+    }
+
+    .theme-btn.fav {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .theme-btn.fav:hover {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
+
+    /* ============================================================
+       LAYOUT
+    ============================================================ */
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: calc(64px + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
+    }
+
+    .section {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-md);
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    /* ============================================================
+       TYPOGRAPHY — SEMANTIC TAGS
+    ============================================================ */
+    h1 {
+      font-family: var(--font-heading);
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 600;
+      color: var(--color-primary);
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    h3 {
+      font-family: var(--font-heading);
+      font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      font-weight: 600;
+      color: var(--color-text);
+      line-height: 1.3;
+      margin-bottom: 0.3rem;
+    }
+
+    h4 {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--color-secondary);
+      line-height: 1.3;
+      margin-bottom: 0.25rem;
+    }
+
+    h5 {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    h6 {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--color-primary);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2rem;
+    }
+
+    p {
+      font-size: 1rem;
+      color: var(--color-text);
+      line-height: 1.7;
+      margin-bottom: 0.75rem;
+    }
+
+    p.lead {
+      font-size: 1.15rem;
+      color: var(--color-text-muted);
+      font-weight: 300;
+    }
+
+    strong { font-weight: 600; color: var(--color-text); }
+    em { font-style: italic; color: var(--color-secondary); }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      position: relative;
+      transition: color var(--transition-fast);
+    }
+
+    a:hover { color: var(--color-secondary); }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--color-surface);
+      color: var(--color-primary);
+      padding: 0.15em 0.45em;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--color-primary);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface);
+      border-radius: 0 var(--radius-card) var(--radius-card) 0;
+      color: var(--color-text-muted);
+      font-style: italic;
+      margin: var(--spacing-sm) 0;
+    }
+
+    ul, ol {
+      padding-left: 1.5rem;
+      color: var(--color-text);
+    }
+
+    li { margin-bottom: 0.3rem; line-height: 1.6; }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--color-border);
+      margin: var(--spacing-md) 0;
+    }
+
+    /* ============================================================
+       REUSABLE UTILITY CLASSES
+    ============================================================ */
+
+    /* --- Cards --- */
+    .card {
+      background: var(--color-surface);
+      border-radius: var(--radius-card);
+      padding: var(--spacing-md);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-card);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card), 0 0 0 1px var(--color-primary);
+    }
+
+    .card-alt {
+      background: var(--color-surface-alt);
+    }
+
+    /* --- Badges --- */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: var(--radius-badge);
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid var(--color-border);
+      transition: all var(--transition-fast);
+      font-family: var(--font-body);
+    }
+
+    .badge-tech {
+      background: var(--badge-tech-bg);
+      color: var(--color-text);
+    }
+
+    .badge-tech:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      transform: translateY(-1px);
+      cursor: default;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-info {
+      background: rgba(91, 202, 245, 0.12);
+      color: var(--color-info);
+      border-color: rgba(91, 202, 245, 0.25);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-accent {
+      background: rgba(238, 117, 244, 0.12);
+      color: var(--color-primary);
+      border-color: rgba(238, 117, 244, 0.25);
+    }
+
+    /* --- Buttons --- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: var(--radius-card);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: var(--color-background);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+      color: var(--color-background);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--color-primary);
+      border: 1px solid var(--color-primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--color-primary);
+      color: var(--color-background);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.9rem;
+      font-size: 0.82rem;
+    }
+
+    /* --- Inputs --- */
+    .input {
+      width: 100%;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      padding: 0.65rem 1rem;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--color-text);
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .input::placeholder { color: var(--color-text-muted); }
+
+    .input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(238,117,244,0.15);
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.4rem;
+    }
+
+    /* --- Underline hover link --- */
+    .link-underline {
+      color: var(--color-primary);
+      text-decoration: none;
+      position: relative;
+    }
+
+    .link-underline::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: var(--color-primary);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform var(--transition-fast);
+    }
+
+    .link-underline:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    /* --- Stat --- */
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+    }
+
+    .stat-value {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1;
+      font-family: var(--font-heading);
+    }
+
+    .stat-unit {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    /* --- Tag group --- */
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    /* --- Divider label --- */
+    .divider-label {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    .divider-label::before,
+    .divider-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    /* --- Mono text --- */
+    .text-mono {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: var(--color-primary);
+    }
+
+    .text-muted { color: var(--color-text-muted); }
+    .text-primary { color: var(--color-primary); }
+    .text-secondary { color: var(--color-secondary); }
+
+    /* --- Grid helpers --- */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-md);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-md);
+    }
+
+    @media (max-width: 640px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* --- Color swatches --- */
+    .swatch-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .swatch-color {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+    }
+
+    .swatch-name {
+      font-size: 0.68rem;
+      color: var(--color-text-muted);
+      font-family: var(--font-mono);
+      text-align: center;
+    }
+
+    /* --- Notification / alert --- */
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-card);
+      border: 1px solid;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .alert-success {
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.2);
+      color: var(--color-success);
+    }
+
+    .alert-info {
+      background: rgba(91,202,245,0.08);
+      border-color: rgba(91,202,245,0.2);
+      color: var(--color-info);
+    }
+
+    .alert-warning {
+      background: rgba(251,191,36,0.08);
+      border-color: rgba(251,191,36,0.2);
+      color: #fbbf24;
+    }
+
+    /* --- Avatar --- */
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-surface-alt);
+      border: 2px solid var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .avatar-lg { width: 56px; height: 56px; font-size: 1.1rem; }
+
+    /* --- Progress bar --- */
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--color-surface-alt);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--color-primary);
+      border-radius: 9999px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       PAGE INTRO
+    ============================================================ */
+    .page-hero {
+      margin-bottom: var(--spacing-xl);
+      padding-bottom: var(--spacing-lg);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .page-hero h1 { margin-bottom: 0.5rem; }
+    .page-hero p { color: var(--color-text-muted); font-size: 1.05rem; max-width: 560px; }
+
+    /* ============================================================
+       THEME NAME TAG
+    ============================================================ */
+    .theme-name-display {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 9999px;
+      padding: 0.35rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: var(--spacing-md);
+      font-family: var(--font-mono);
+      transition: all 0.4s ease;
+    }
+
+    .theme-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--color-surface); }
+    ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+  </style>
+</head>
+<body data-theme="void">
+
+  <!-- THEME BAR -->
+  <div class="theme-bar">
+    <span class="theme-bar-label">Favorites</span>
+    <div class="theme-buttons">
+      <button class="theme-btn fav active" data-theme="void">🕳️ Void</button>
+      <button class="theme-btn fav" data-theme="glacier">🧊 Glacier</button>
+      <div class="theme-divider"></div>
+      <span class="theme-bar-label">Others</span>
+      <button class="theme-btn" data-theme="nebula">🌌 Nebula</button>
+      <button class="theme-btn" data-theme="dusk">🌃 Dusk</button>
+      <button class="theme-btn" data-theme="prism">🔷 Prism</button>
+      <button class="theme-btn" data-theme="cosmo">✨ Cosmo</button>
+      <button class="theme-btn" data-theme="slate">🩶 Slate</button>
+      <button class="theme-btn" data-theme="haze">🫧 Haze</button>
+    </div>
+  </div>
+
+  <div class="page">
+
+    <!-- HERO -->
+    <div class="page-hero">
+      <div class="theme-name-display">
+        <div class="theme-dot"></div>
+        <span id="theme-label">nebula</span>
+      </div>
+      <h1>Joe's Styleguide</h1>
+      <p>A living reference for colors, typography, and reusable components. Switch themes above to preview different directions.</p>
+    </div>
+
+    <!-- COLORS -->
+    <div class="section">
+      <div class="section-label">Colors</div>
+      <div class="swatch-row">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-primary)"></div>
+          <div class="swatch-name">primary</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-secondary)"></div>
+          <div class="swatch-name">secondary</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-background)"></div>
+          <div class="swatch-name">background</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-surface)"></div>
+          <div class="swatch-name">surface</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-surface-alt)"></div>
+          <div class="swatch-name">surface-alt</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-text)"></div>
+          <div class="swatch-name">text</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-text-muted)"></div>
+          <div class="swatch-name">text-muted</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-border)"></div>
+          <div class="swatch-name">border</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-success)"></div>
+          <div class="swatch-name">success</div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--color-info)"></div>
+          <div class="swatch-name">info</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TYPOGRAPHY -->
+    <div class="section">
+      <div class="section-label">Typography</div>
+      <div class="card" style="display:flex; flex-direction:column; gap: 1rem;">
+        <h1>h1 — Heading One</h1>
+        <h2>h2 — Heading Two</h2>
+        <h3>h3 — Heading Three</h3>
+        <h4>h4 — Heading Four</h4>
+        <h5>h5 — Heading Five</h5>
+        <h6>h6 — Heading Six</h6>
+        <hr />
+        <p class="lead">Lead paragraph — slightly larger, lighter weight. Great for intros and hero subtitles.</p>
+        <p>Body paragraph. Font is <strong>bold when needed</strong>, or <em>italic for emphasis</em>. Links look like <a href="#">this anchor</a>. Here's some <code>inline code</code> for you.</p>
+        <blockquote>This is a blockquote. Great for callouts, testimonials, or highlighted notes from your content.</blockquote>
+        <ul>
+          <li>Unordered list item one</li>
+          <li>Unordered list item two</li>
+          <li>Unordered list item three</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- BADGES -->
+    <div class="section">
+      <div class="section-label">Badges</div>
+      <div class="tag-group">
+        <span class="badge badge-tech">Flutter</span>
+        <span class="badge badge-tech">React</span>
+        <span class="badge badge-tech">TypeScript</span>
+        <span class="badge badge-tech">Roblox / Lua</span>
+        <span class="badge badge-success">Active</span>
+        <span class="badge badge-info">In Progress</span>
+        <span class="badge badge-accent">Featured</span>
+      </div>
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="section">
+      <div class="section-label">Buttons</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-outline">Outline</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-primary btn-sm">Small Primary</button>
+        <button class="btn btn-outline btn-sm">Small Outline</button>
+      </div>
+    </div>
+
+    <!-- INPUTS -->
+    <div class="section">
+      <div class="section-label">Inputs</div>
+      <div style="max-width: 420px; display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <label class="input-label">Project Name</label>
+          <input class="input" type="text" placeholder="e.g. Shroomshire Restoration" />
+        </div>
+        <div>
+          <label class="input-label">Description</label>
+          <textarea class="input" rows="3" placeholder="What's this project about?"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="section">
+      <div class="section-label">Cards</div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Project Card</h3>
+          <p class="text-muted" style="font-size:0.9rem; margin-bottom: 0.75rem;">A standard card component for projects, blog posts, or anything that needs a container.</p>
+          <div class="tag-group">
+            <span class="badge badge-tech">Roblox</span>
+            <span class="badge badge-success">Active</span>
+          </div>
+        </div>
+        <div class="card card-alt">
+          <h3>Alt Surface Card</h3>
+          <p class="text-muted" style="font-size:0.9rem; margin-bottom: 0.75rem;">Uses <code>surface-alt</code> background. Useful for nested cards or secondary containers.</p>
+          <div class="tag-group">
+            <span class="badge badge-tech">Flutter</span>
+            <span class="badge badge-info">In Progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="section">
+      <div class="section-label">Alerts</div>
+      <div class="alert alert-success">✅ Build deployed successfully to GitHub Pages.</div>
+      <div class="alert alert-info">ℹ️ This project is using the Glacier theme by default.</div>
+      <div class="alert alert-warning">⚠️ Don't forget to update the README before shipping.</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="section">
+      <div class="section-label">Stats</div>
+      <div class="card">
+        <div style="display: flex; gap: var(--spacing-xl); flex-wrap: wrap;">
+          <div class="stat">
+            <div class="stat-label">Projects Shipped</div>
+            <div class="stat-value">12</div>
+            <div class="stat-unit">all time</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Visits</div>
+            <div class="stat-value">900k<span class="stat-unit">+</span></div>
+            <div class="stat-unit">on Roblox</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Subscribers</div>
+            <div class="stat-value">1k<span class="stat-unit">+</span></div>
+            <div class="stat-unit">YouTube</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Years XP</div>
+            <div class="stat-value">6</div>
+            <div class="stat-unit">Flutter / React</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="section">
+      <div class="section-label">Progress Bars</div>
+      <div class="card" style="display: flex; flex-direction: column; gap: 1rem;">
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <span class="text-muted" style="font-size:0.85rem;">Flutter</span>
+            <span class="text-mono">90%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <span class="text-muted" style="font-size:0.85rem;">React / TypeScript</span>
+            <span class="text-mono">85%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <span class="text-muted" style="font-size:0.85rem;">Roblox / Lua</span>
+            <span class="text-mono">70%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:70%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MISC UTILITIES -->
+    <div class="section">
+      <div class="section-label">Utilities</div>
+      <div class="card" style="display:flex; flex-direction:column; gap: 1.25rem;">
+        <div class="divider-label">Section Divider Label</div>
+        <div style="display:flex; align-items:center; gap: 1rem;">
+          <div class="avatar">JK</div>
+          <div class="avatar avatar-lg">JK</div>
+          <div>
+            <p style="margin:0; font-weight:600;">Joe Kurtz</p>
+            <p style="margin:0; font-size:0.85rem;" class="text-muted">Tabs Labs · Zagreb</p>
+          </div>
+        </div>
+        <div>
+          <p style="margin-bottom:0.4rem;">
+            <a href="#" class="link-underline">Animated underline link</a> — hover me.
+          </p>
+          <p class="text-mono">var(--color-primary) / var(--font-mono) text</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VARIABLES REFERENCE -->
+    <div class="section">
+      <div class="section-label">CSS Variables Reference</div>
+      <div class="card">
+        <pre style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--color-text-muted); line-height: 1.8; overflow-x: auto;"><span style="color:var(--color-primary)">/* Colors */</span>
+--color-primary       <span style="color:var(--color-text-muted)">/* brand / accent */</span>
+--color-secondary     <span style="color:var(--color-text-muted)">/* secondary accent */</span>
+--color-background    <span style="color:var(--color-text-muted)">/* page bg */</span>
+--color-surface       <span style="color:var(--color-text-muted)">/* card bg */</span>
+--color-surface-alt   <span style="color:var(--color-text-muted)">/* nested card bg */</span>
+--color-text          <span style="color:var(--color-text-muted)">/* body text */</span>
+--color-text-muted    <span style="color:var(--color-text-muted)">/* secondary text */</span>
+--color-border        <span style="color:var(--color-text-muted)">/* borders / dividers */</span>
+--color-success       <span style="color:var(--color-text-muted)">/* success state */</span>
+--color-info          <span style="color:var(--color-text-muted)">/* info state */</span>
+
+<span style="color:var(--color-primary)">/* Typography */</span>
+--font-heading        <span style="color:var(--color-text-muted)">/* h1–h4 */</span>
+--font-body           <span style="color:var(--color-text-muted)">/* body, inputs, buttons */</span>
+--font-mono           <span style="color:var(--color-text-muted)">/* code, labels */</span>
+
+<span style="color:var(--color-primary)">/* Spacing */</span>
+--spacing-xs  0.5rem  --spacing-sm  1rem
+--spacing-md  1.5rem  --spacing-lg  2rem  --spacing-xl  3rem
+
+<span style="color:var(--color-primary)">/* Misc */</span>
+--radius-card         <span style="color:var(--color-text-muted)">/* card border-radius */</span>
+--radius-badge        <span style="color:var(--color-text-muted)">/* badge border-radius */</span>
+--transition-fast     0.2s ease
+--transition-normal   0.3s ease</pre>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+  <script>
+    const themes = {
+      void: '🕳️ Void',
+      glacier: '🧊 Glacier',
+      nebula: '🌌 Nebula',
+      dusk: '🌃 Dusk',
+      prism: '🔷 Prism',
+      cosmo: '✨ Cosmo',
+      slate: '🩶 Slate',
+      haze: '🫧 Haze'
+    };
+
+    const body = document.body;
+    const label = document.getElementById('theme-label');
+    const buttons = document.querySelectorAll('.theme-btn');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        body.setAttribute('data-theme', theme);
+        label.textContent = theme;
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
