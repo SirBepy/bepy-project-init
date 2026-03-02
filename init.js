@@ -328,6 +328,30 @@ function migrateLooseFiles() {
     fs.writeFileSync(indexPath, html);
     console.log(YELLOW + "✏️  Updated index.html references" + RESET);
   }
+
+  const swPath = path.resolve("sw.js");
+  if (fs.existsSync(swPath)) {
+    let sw = fs.readFileSync(swPath, "utf8");
+    let swChanged = false;
+    for (const move of moves) {
+      const patched = sw
+        .replaceAll("./" + move.old, "./" + move.new)
+        .replaceAll("'/" + move.old, "'/" + move.new)
+        .replaceAll('"/' + move.old, '"/' + move.new)
+        .replaceAll("'" + move.old, "'" + move.new)
+        .replaceAll('"' + move.old, '"' + move.new);
+      if (patched !== sw) swChanged = true;
+      sw = patched;
+    }
+    if (swChanged) {
+      sw = sw.replace(
+        /(CACHE_NAME\s*=\s*['"][^'"]*-v)(\d+)(['"])/,
+        (_, pre, num, quote) => pre + (parseInt(num, 10) + 1) + quote,
+      );
+      fs.writeFileSync(swPath, sw);
+      console.log(YELLOW + "✏️  Updated sw.js paths and bumped cache version" + RESET);
+    }
+  }
 }
 
 function patchWorkflow(workflowPath) {
