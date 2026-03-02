@@ -173,7 +173,7 @@ function injectIntoHtml(htmlPath, options = {}) {
 
   if (options.buildInfoScript && !html.includes("build-info.js")) {
     const buildInfoTag =
-      '    <script type="module" src="/assets/scripts/build-info.js"></script>\n';
+      '    <script type="module" src="assets/scripts/build-info.js"></script>\n';
     html = html.replace("</body>", buildInfoTag + "  </body>");
   }
 
@@ -262,7 +262,8 @@ function detectMisplaced() {
   for (const entry of fs.readdirSync(".", { withFileTypes: true })) {
     if (!entry.isFile()) continue;
     const name = entry.name;
-    if (name.startsWith(".") || CONFIG_RE.test(name) || SW_RE.test(name)) continue;
+    if (name.startsWith(".") || CONFIG_RE.test(name) || SW_RE.test(name))
+      continue;
     if (name.endsWith(".js")) {
       misplaced.push(`${name} → assets/scripts/${name}`);
     } else if (name.endsWith(".css") || name.endsWith(".scss")) {
@@ -306,7 +307,8 @@ function migrateLooseFiles() {
   for (const entry of fs.readdirSync(".", { withFileTypes: true })) {
     if (!entry.isFile()) continue;
     const name = entry.name;
-    if (name.startsWith(".") || CONFIG_RE.test(name) || SW_RE.test(name)) continue;
+    if (name.startsWith(".") || CONFIG_RE.test(name) || SW_RE.test(name))
+      continue;
     const src = path.resolve(name);
     if (name.endsWith(".js")) {
       moveFile(src, "assets/scripts", name);
@@ -349,7 +351,9 @@ function migrateLooseFiles() {
         (_, pre, num, quote) => pre + (parseInt(num, 10) + 1) + quote,
       );
       fs.writeFileSync(swPath, sw);
-      console.log(YELLOW + "✏️  Updated sw.js paths and bumped cache version" + RESET);
+      console.log(
+        YELLOW + "✏️  Updated sw.js paths and bumped cache version" + RESET,
+      );
     }
   }
 }
@@ -520,9 +524,14 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/styles/themes"));
 
-    const styleScssIsNew = !fs.existsSync(path.resolve("assets/styles/style.scss"));
+    const styleScssIsNew = !fs.existsSync(
+      path.resolve("assets/styles/style.scss"),
+    );
     assertSafeToOverwrite(path.resolve("assets/styles/style.scss"));
-    fs.writeFileSync(path.resolve("assets/styles/style.scss"), "/* Styles */\n");
+    fs.writeFileSync(
+      path.resolve("assets/styles/style.scss"),
+      "/* Styles */\n",
+    );
     if (styleScssIsNew) track(path.resolve("assets/styles/style.scss"));
 
     const assetsScriptsExisted = fs.existsSync("assets/scripts");
@@ -530,7 +539,11 @@ function stepScaffold() {
     if (!assetsScriptsExisted) track(path.resolve("assets/scripts"));
 
     copyTemplate("vite/main.js", path.resolve("assets/scripts/main.js"), {});
-    copyTemplate("build-info.js", path.resolve("assets/scripts/build-info.js"), {});
+    copyTemplate(
+      "build-info.js",
+      path.resolve("assets/scripts/build-info.js"),
+      {},
+    );
     injectIntoHtml(path.resolve("index.html"), {
       googleFonts: true,
       voidTheme: true,
@@ -564,9 +577,14 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/styles/themes"));
 
-    const indexScssIsNew = !fs.existsSync(path.resolve("assets/styles/index.scss"));
+    const indexScssIsNew = !fs.existsSync(
+      path.resolve("assets/styles/index.scss"),
+    );
     assertSafeToOverwrite(path.resolve("assets/styles/index.scss"));
-    fs.writeFileSync(path.resolve("assets/styles/index.scss"), "/* Styles */\n");
+    fs.writeFileSync(
+      path.resolve("assets/styles/index.scss"),
+      "/* Styles */\n",
+    );
     if (indexScssIsNew) track(path.resolve("assets/styles/index.scss"));
     copyTemplate("react/App.scss", path.resolve("assets/styles/App.scss"), {});
 
@@ -574,7 +592,11 @@ function stepScaffold() {
     fs.mkdirSync("assets/scripts", { recursive: true });
     if (!reactScriptsExisted) track(path.resolve("assets/scripts"));
 
-    copyTemplate("build-info.js", path.resolve("assets/scripts/build-info.js"), {});
+    copyTemplate(
+      "build-info.js",
+      path.resolve("assets/scripts/build-info.js"),
+      {},
+    );
     injectIntoHtml(path.resolve("index.html"), {
       googleFonts: true,
       voidTheme: true,
@@ -612,13 +634,25 @@ async function stepStyleguide() {
 
   console.log(YELLOW + "🎨 Setting up styleguide..." + RESET);
 
-  copyTemplate("styleguide.scss", path.resolve("assets/styles/styleguide.scss"), {});
+  copyTemplate(
+    "styleguide.scss",
+    path.resolve("assets/styles/styleguide.scss"),
+    {},
+  );
 
   if (framework === "vite") {
-    copyTemplate("vite/style.scss", path.resolve("assets/styles/style.scss"), {});
+    copyTemplate(
+      "vite/style.scss",
+      path.resolve("assets/styles/style.scss"),
+      {},
+    );
   }
   if (framework === "react") {
-    copyTemplate("react/index.scss", path.resolve("assets/styles/index.scss"), {});
+    copyTemplate(
+      "react/index.scss",
+      path.resolve("assets/styles/index.scss"),
+      {},
+    );
     copyTemplate("react/App.scss", path.resolve("assets/styles/App.scss"), {});
   }
 
@@ -849,7 +883,9 @@ async function upgradePatch() {
       fs.renameSync(path.join(oldThemesDir, f), path.join(themesDir, f));
     }
     fs.rmdirSync(oldThemesDir);
-    console.log(YELLOW + "📁 Moved assets/themes/ → assets/styles/themes/" + RESET);
+    console.log(
+      YELLOW + "📁 Moved assets/themes/ → assets/styles/themes/" + RESET,
+    );
   }
 
   console.log(YELLOW + "🎨 Downloading themes..." + RESET);
@@ -867,13 +903,21 @@ async function upgradePatch() {
 
   // Step 3: add build-info only if not already present (may have been migrated in step 1)
   if (!fs.existsSync(path.resolve("assets/scripts/build-info.js"))) {
-    copyTemplate("build-info.js", path.resolve("assets/scripts/build-info.js"), {});
+    copyTemplate(
+      "build-info.js",
+      path.resolve("assets/scripts/build-info.js"),
+      {},
+    );
   }
 
   // Remove any stray build-info that wasn't caught by migrateLooseFiles (e.g. src/)
   if (fs.existsSync(path.resolve("src/build-info.js"))) {
     fs.rmSync(path.resolve("src/build-info.js"));
-    console.log(YELLOW + "🗑️  Removed old src/build-info.js (moved to assets/scripts/)" + RESET);
+    console.log(
+      YELLOW +
+        "🗑️  Removed old src/build-info.js (moved to assets/scripts/)" +
+        RESET,
+    );
   }
 
   const workflowsDir = path.resolve(".github/workflows");
@@ -890,10 +934,17 @@ async function upgradePatch() {
   }
 
   if (!fs.existsSync(path.resolve("package.json"))) {
-    const pkgName = path.basename(process.cwd()).toLowerCase().replace(/[^a-z0-9-]/g, "-");
+    const pkgName = path
+      .basename(process.cwd())
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, "-");
     fs.writeFileSync(
       path.resolve("package.json"),
-      JSON.stringify({ name: pkgName, version: "1.0.0", scripts: { dev: "npx serve ." } }, null, 2) + "\n",
+      JSON.stringify(
+        { name: pkgName, version: "1.0.0", scripts: { dev: "npx serve ." } },
+        null,
+        2,
+      ) + "\n",
     );
     console.log(GREEN + "✅ Created package.json (run: npm run dev)" + RESET);
   }
@@ -911,7 +962,9 @@ function upgradeFinalize() {
 
   let devCmd = "  Open index.html in a browser or use a local server";
   try {
-    const pkg = JSON.parse(fs.readFileSync(path.resolve("package.json"), "utf8"));
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve("package.json"), "utf8"),
+    );
     if (pkg.scripts && pkg.scripts.dev) devCmd = "  npm run dev";
   } catch (e) {}
 
@@ -920,7 +973,8 @@ function upgradeFinalize() {
       "✅ Upgrade complete!\n" +
       "\n" +
       "Next steps:\n" +
-      devCmd + "\n" +
+      devCmd +
+      "\n" +
       "  Push to GitHub to trigger deployment" +
       RESET,
   );
