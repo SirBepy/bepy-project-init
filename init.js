@@ -993,7 +993,7 @@ async function stepAiSetup() {
     console.log(YELLOW + "🤖 Running AI setup via Claude CLI..." + RESET);
     const ok = runClaudeCli("SETUP_PROMPT.md");
     if (ok) {
-      const committed = commitIfDirty("chore: apply AI setup");
+      const committed = commitIfDirty("CHORE: apply AI setup");
       if (!committed) {
         console.log(
           YELLOW +
