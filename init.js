@@ -123,6 +123,55 @@ function cleanup() {
 
 // ─── New utility functions ─────────────────────────────────────────────────────
 
+function runClaudeCli(promptFile) {
+  const promptPath = path.join(scriptDir, "prompts", promptFile);
+
+  if (!fs.existsSync(promptPath)) {
+    console.log(RED + `❌ Prompt file not found: ${promptPath}` + RESET);
+    console.log(
+      YELLOW + `💡 Run it manually: claude < "${promptPath}"` + RESET,
+    );
+    return false;
+  }
+
+  try {
+    execSync(
+      process.platform === "win32" ? "where claude" : "which claude",
+      { stdio: "pipe" },
+    );
+  } catch (e) {
+    console.log(RED + "❌ Claude CLI not found on PATH." + RESET);
+    console.log(
+      YELLOW + `💡 Run it manually: claude < "${promptPath}"` + RESET,
+    );
+    return false;
+  }
+
+  try {
+    execSync(`claude < "${promptPath}"`, { stdio: "inherit" });
+    return true;
+  } catch (e) {
+    console.log(RED + "❌ Claude CLI call failed." + RESET);
+    console.log(
+      YELLOW + `💡 Run it manually: claude < "${promptPath}"` + RESET,
+    );
+    return false;
+  }
+}
+
+function commitIfDirty(message) {
+  try {
+    const status = execSync("git status --porcelain", { encoding: "utf8" });
+    if (status.trim().length > 0) {
+      execSync("git add .", { stdio: "inherit" });
+      execSync(`git commit -m "${message}"`, { stdio: "inherit" });
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function downloadThemes(destDir) {
   const themes = ["void", "glacier", "cosmo", "nebula"];
   for (const theme of themes) {
@@ -423,19 +472,22 @@ async function resolveFromArgs() {
 
   const [first, second] = args;
 
+  const webFrameworks = ["react", "vite"];
+  const allFrameworks = ["react", "vite", "roblox", "general"];
+
   if (first === "update" || first === "upgrade") {
     upgradeMode = true;
-    if (second === "react" || second === "vite") framework = second;
+    if (webFrameworks.includes(second)) framework = second;
     return;
   }
 
   if (first === "init" || first === "create") {
     upgradeMode = false;
-    if (second === "react" || second === "vite") framework = second;
+    if (allFrameworks.includes(second)) framework = second;
     return;
   }
 
-  if (first === "react" || first === "vite") {
+  if (allFrameworks.includes(first)) {
     upgradeMode = false;
     framework = first;
     return;
@@ -472,14 +524,18 @@ async function promptMissing() {
     upgradeMode = choice === "2";
   }
 
-  if (framework === "") {
-    const choice = await prompt("Framework? (1) Vite  (2) React", "", (v) => {
-      if (v !== "1" && v !== "2") {
-        console.log(RED + "Invalid choice. Enter 1 or 2." + RESET);
-        return false;
-      }
-      return true;
-    });
+  if (upgradeMode === true && framework === "") {
+    const choice = await prompt(
+      "Framework? (1) Vite  (2) React",
+      "",
+      (v) => {
+        if (v !== "1" && v !== "2") {
+          console.log(RED + "Invalid choice. Enter 1 or 2." + RESET);
+          return false;
+        }
+        return true;
+      },
+    );
     framework = choice === "1" ? "vite" : "react";
   }
 }
@@ -518,6 +574,53 @@ async function stepProjectName() {
   }
   projectName = name;
   projectDescription = await prompt("Project description? (optional)", "");
+}
+
+function isWebFramework(fw) {
+  return fw === "vite" || fw === "react";
+}
+
+async function stepFramework() {
+  if (framework === "vite" || framework === "react" || framework === "roblox" || framework === "general") {
+    return;
+  }
+  const choice = await prompt(
+    "Framework? (1) Vite  (2) React  (3) Roblox  (4) General",
+    "",
+    (v) => {
+      if (v !== "1" && v !== "2" && v !== "3" && v !== "4") {
+        console.log(RED + "Invalid choice. Enter 1, 2, 3, or 4." + RESET);
+        return false;
+      }
+      return true;
+    },
+  );
+  if (choice === "1") framework = "vite";
+  else if (choice === "2") framework = "react";
+  else if (choice === "3") framework = "roblox";
+  else framework = "general";
+}
+
+function stepScaffoldNonWeb() {
+  console.log(YELLOW + "⚙️  Setting up project..." + RESET);
+
+  const templateDir = framework; // 'roblox' or 'general'
+  const subs = {
+    PROJECT_NAME: projectName,
+    PROJECT_DESCRIPTION: projectDescription,
+  };
+
+  copyTemplate(`${templateDir}/gitignore`, path.resolve(".gitignore"), subs);
+  copyTemplate(`${templateDir}/CLAUDE.md`, path.resolve("CLAUDE.md"), subs);
+  copyTemplate(`${templateDir}/README.md`, path.resolve("README.md"), subs);
+  copyTemplate(`${templateDir}/skills`, path.resolve("skills"), subs);
+
+  console.log(YELLOW + "🔧 Initializing git..." + RESET);
+  execSync("git init", { stdio: "inherit" });
+  execSync("git add .", { stdio: "inherit" });
+  execSync('git commit -m "chore: initial project setup"', { stdio: "inherit" });
+
+  console.log(GREEN + "✅ Project set up." + RESET);
 }
 
 function stepScaffold() {
@@ -568,6 +671,14 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/styles/themes"));
 
+    // Style stub for Vite
+    const viteStylePath = path.resolve("assets/styles/style.scss");
+    if (!fs.existsSync(viteStylePath)) {
+      assertSafeToOverwrite(viteStylePath);
+      fs.writeFileSync(viteStylePath, "/* Styles */\n");
+      track(viteStylePath);
+    }
+
     const assetsScriptsExisted = fs.existsSync("assets/scripts");
     fs.mkdirSync("assets/scripts", { recursive: true });
     if (!assetsScriptsExisted) track(path.resolve("assets/scripts"));
@@ -612,6 +723,14 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/styles/themes"));
 
+    // Style stub for React
+    const reactStylePath = path.resolve("assets/styles/index.scss");
+    if (!fs.existsSync(reactStylePath)) {
+      assertSafeToOverwrite(reactStylePath);
+      fs.writeFileSync(reactStylePath, "/* Styles */\n");
+      track(reactStylePath);
+    }
+
     const reactScriptsExisted = fs.existsSync("assets/scripts");
     fs.mkdirSync("assets/scripts", { recursive: true });
     if (!reactScriptsExisted) track(path.resolve("assets/scripts"));
@@ -646,15 +765,18 @@ function stepScaffold() {
   console.log(GREEN + "✅ Project scaffolded." + RESET);
 }
 
-function stepStyleguide() {
+async function stepStyleguide() {
+  const answer = await prompt("Set up styleguide? [Y/n]", "y");
+  if (answer.toLowerCase() === "n") {
+    setupStyleguide = false;
+    return;
+  }
   console.log(YELLOW + "🎨 Setting up styleguide..." + RESET);
-
   copyTemplate(
     "styleguide.scss",
     path.resolve("assets/styles/styleguide.scss"),
     {},
   );
-
   if (framework === "vite") {
     copyTemplate(
       "vite/style.scss",
@@ -670,7 +792,6 @@ function stepStyleguide() {
     );
     copyTemplate("react/App.scss", path.resolve("assets/styles/App.scss"), {});
   }
-
   console.log(GREEN + "✅ Styleguide ready." + RESET);
   setupStyleguide = true;
 }
@@ -801,9 +922,43 @@ function stepFinalize() {
   );
 }
 
+async function stepAiSetup() {
+  try {
+    const promptPath = path.join(scriptDir, "prompts", "SETUP_PROMPT.md");
+    const answer = await prompt("Run AI setup now? (y/n)", "n");
+    if (answer.toLowerCase() !== "y") {
+      console.log(
+        YELLOW + `💡 Run it later: claude < "${promptPath}"` + RESET,
+      );
+      return;
+    }
+    console.log(YELLOW + "🤖 Running AI setup via Claude CLI..." + RESET);
+    const ok = runClaudeCli("SETUP_PROMPT.md");
+    if (ok) {
+      const committed = commitIfDirty("chore: apply AI setup");
+      if (!committed) {
+        console.log(
+          YELLOW +
+            "⚠️  AI setup ran but changes could not be committed. Commit them manually." +
+            RESET,
+        );
+      }
+      console.log(GREEN + "✅ AI setup complete." + RESET);
+    }
+  } catch (e) {
+    console.log(
+      YELLOW +
+        "⚠️  AI setup step failed: " +
+        e.message +
+        ". Continuing." +
+        RESET,
+    );
+  }
+}
+
 // ─── Upgrade mode functions ────────────────────────────────────────────────────
 
-async function upgradeGitSafety() {
+function upgradeAssertGitRepo() {
   try {
     execSync("git rev-parse --git-dir", { stdio: "pipe" });
   } catch (e) {
@@ -812,7 +967,24 @@ async function upgradeGitSafety() {
     );
     process.exit(1);
   }
+}
 
+function upgradeCheckWebEligibility() {
+  const indexPath = path.resolve("index.html");
+  if (!fs.existsSync(indexPath)) {
+    const htmlFiles = fs.readdirSync(".").filter((f) => f.endsWith(".html"));
+    if (htmlFiles.length === 0) {
+      console.log(
+        RED +
+          "❌ Upgrade currently supports web projects only (Vite/React). Use create mode for Roblox/General." +
+          RESET,
+      );
+      process.exit(1);
+    }
+  }
+}
+
+async function upgradeHandleDirtyTree() {
   const status = execSync("git status --porcelain", { encoding: "utf8" });
   if (status.trim().length > 0) {
     console.log(YELLOW + "⚠️  You have uncommitted changes:" + RESET);
@@ -854,8 +1026,11 @@ async function upgradeDetect() {
       renamed = true;
     } else {
       console.log(
-        YELLOW + "No index.html found and no HTML files to rename." + RESET,
+        RED +
+          "❌ Upgrade currently supports web projects only (Vite/React). Use create mode for Roblox/General." +
+          RESET,
       );
+      process.exit(1);
     }
   }
 
@@ -969,7 +1144,13 @@ async function upgradePatch() {
 
   // Step 4: ensure styleguide is set up
   const styleguidePath = path.resolve("assets/styles/styleguide.scss");
-  if (!fs.existsSync(styleguidePath)) {
+  const styleguideExisted = fs.existsSync(styleguidePath);
+  const styleguideContentBefore = styleguideExisted
+    ? fs.readFileSync(styleguidePath, "utf8")
+    : null;
+  let styleguideChanged = false;
+
+  if (!styleguideExisted) {
     fs.mkdirSync(path.resolve("assets/styles"), { recursive: true });
     copyTemplate("styleguide.scss", styleguidePath, {});
     console.log(GREEN + "✅ Added styleguide.scss" + RESET);
@@ -1015,11 +1196,36 @@ async function upgradePatch() {
       }
     }
   }
+
+  const styleguideContentAfter = fs.existsSync(styleguidePath)
+    ? fs.readFileSync(styleguidePath, "utf8")
+    : null;
+  styleguideChanged =
+    styleguideContentAfter !== null &&
+    styleguideContentAfter !== styleguideContentBefore;
+
+  if (styleguideChanged) {
+    console.log(
+      YELLOW + "🤖 Running styleguide adoption via Claude CLI..." + RESET,
+    );
+    const styleguideOk = runClaudeCli("STYLEGUIDE_PROMPT.md");
+    if (!styleguideOk) {
+      const promptPath = path.join(scriptDir, "prompts", "STYLEGUIDE_PROMPT.md");
+      console.log(
+        RED +
+          "❌ Styleguide adoption via Claude CLI failed. Apply it manually." +
+          RESET,
+      );
+      console.log(
+        YELLOW + `💡 Run it manually: claude < "${promptPath}"` + RESET,
+      );
+    }
+  }
 }
 
 function upgradeFinalize() {
   execSync("git add .", { stdio: "inherit" });
-  execSync('git commit -m "MAJOR: apply bepy-project-init upgrade"', {
+  execSync('git commit -m "chore: apply bepy-project-init upgrade"', {
     stdio: "inherit",
   });
 
@@ -1061,10 +1267,13 @@ async function main() {
 
   if (upgradeMode) {
     try {
-      await upgradeGitSafety();
+      upgradeAssertGitRepo();
+      upgradeCheckWebEligibility();
+      await upgradeHandleDirtyTree();
       await upgradeDetect();
       await upgradePatch();
       upgradeFinalize();
+      await stepAiSetup();
     } catch (err) {
       rl.close();
       console.error(RED + "❌ Error during upgrade: " + err.message + RESET);
@@ -1082,10 +1291,16 @@ async function main() {
   await preflight();
   await stepProjectName();
   snapshotPreExisting();
-  stepScaffold();
-  stepStyleguide();
-  await stepPwa();
-  stepFinalize();
+  await stepFramework();
+  if (isWebFramework(framework)) {
+    stepScaffold();
+    await stepStyleguide();
+    await stepPwa();
+    stepFinalize();
+  } else {
+    stepScaffoldNonWeb();
+  }
+  await stepAiSetup();
 }
 
 main()
