@@ -296,6 +296,10 @@ function detectMissing() {
     missing.push(".prettierrc");
   }
 
+  if (!fs.existsSync(path.resolve("tsconfig.json"))) {
+    missing.push("tsconfig.json");
+  }
+
   return missing;
 }
 
@@ -638,7 +642,7 @@ function stepScaffold() {
 
   execSync(
     "npm create vite@latest . -- --template " +
-      (framework === "vite" ? "vanilla" : "react"),
+      (framework === "vite" ? "vanilla-ts" : "react-ts"),
     { stdio: "inherit" },
   );
 
@@ -658,12 +662,12 @@ function stepScaffold() {
   );
 
   if (framework === "vite") {
-    // Vite vanilla cleanup
-    for (const f of ["counter.js", "javascript.svg", "public/vite.svg"]) {
+    // Vite vanilla-ts cleanup
+    for (const f of ["src/counter.ts", "src/typescript.svg", "public/vite.svg"]) {
       if (fs.existsSync(f)) fs.rmSync(f, { force: true });
     }
-    fs.rmSync("style.css", { force: true });
-    fs.rmSync("main.js", { force: true });
+    fs.rmSync("src/style.css", { force: true });
+    fs.rmSync("src/main.ts", { force: true });
 
     // Our template already has fonts, void theme, widget, and build-info wired up
     copyTemplate("vite/index.html", path.resolve("index.html"), {
@@ -683,19 +687,25 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/styles/themes"));
 
-    // Style stub for Vite
-    const viteStylePath = path.resolve("assets/styles/style.scss");
-    if (!fs.existsSync(viteStylePath)) {
-      assertSafeToOverwrite(viteStylePath);
-      fs.writeFileSync(viteStylePath, "/* Styles */\n");
-      track(viteStylePath);
-    }
-
     const assetsScriptsExisted = fs.existsSync("assets/scripts");
     fs.mkdirSync("assets/scripts", { recursive: true });
     if (!assetsScriptsExisted) track(path.resolve("assets/scripts"));
 
-    copyTemplate("vite/main.js", path.resolve("assets/scripts/main.js"), {});
+    // src/ directory structure
+    const srcStylesExisted = fs.existsSync("src/styles");
+    fs.mkdirSync("src/styles/components", { recursive: true });
+    if (!srcStylesExisted) track(path.resolve("src/styles"));
+    const srcComponentsExisted = fs.existsSync("src/components");
+    fs.mkdirSync("src/components", { recursive: true });
+    if (!srcComponentsExisted) track(path.resolve("src/components"));
+    const srcUtilsExisted = fs.existsSync("src/utils");
+    fs.mkdirSync("src/utils", { recursive: true });
+    if (!srcUtilsExisted) track(path.resolve("src/utils"));
+    const srcAssetsExisted = fs.existsSync("src/assets");
+    fs.mkdirSync("src/assets", { recursive: true });
+    if (!srcAssetsExisted) track(path.resolve("src/assets"));
+
+    copyTemplate("vite/app.ts", path.resolve("src/app.ts"), {});
     copyTemplate(
       "build-info.js",
       path.resolve("assets/scripts/build-info.js"),
@@ -712,19 +722,15 @@ function stepScaffold() {
     fs.rmSync("public/vite.svg", { force: true });
     fs.rmSync("src/index.css", { force: true });
 
-    copyTemplate("react/App.jsx", path.resolve("src/App.jsx"), {
+    copyTemplate("react/App.tsx", path.resolve("src/App.tsx"), {
       PROJECT_NAME: projectName,
     });
-    copyTemplate("react/main.jsx", path.resolve("src/main.jsx"), {});
+    copyTemplate("react/main.tsx", path.resolve("src/main.tsx"), {});
 
     // Use our own index.html — fonts, void theme, widget, and build-info all pre-wired
     copyTemplate("react/index.html", path.resolve("index.html"), {
       PROJECT_NAME: projectName,
     });
-
-    const srcComponentsExisted = fs.existsSync("src/components");
-    fs.mkdirSync("src/components", { recursive: true });
-    if (!srcComponentsExisted) track(path.resolve("src/components"));
 
     const reactIconsExisted = fs.existsSync("assets/icons");
     fs.mkdirSync("assets/icons", { recursive: true });
@@ -739,17 +745,32 @@ function stepScaffold() {
     console.log(YELLOW + "🎨 Downloading themes..." + RESET);
     downloadThemes(path.resolve("assets/styles/themes"));
 
-    // Style stub for React
-    const reactStylePath = path.resolve("assets/styles/index.scss");
-    if (!fs.existsSync(reactStylePath)) {
-      assertSafeToOverwrite(reactStylePath);
-      fs.writeFileSync(reactStylePath, "/* Styles */\n");
-      track(reactStylePath);
-    }
-
     const reactScriptsExisted = fs.existsSync("assets/scripts");
     fs.mkdirSync("assets/scripts", { recursive: true });
     if (!reactScriptsExisted) track(path.resolve("assets/scripts"));
+
+    // src/ directory structure
+    const srcStylesExisted = fs.existsSync("src/styles");
+    fs.mkdirSync("src/styles/components", { recursive: true });
+    if (!srcStylesExisted) track(path.resolve("src/styles"));
+    const srcComponentsExisted = fs.existsSync("src/components");
+    fs.mkdirSync("src/components", { recursive: true });
+    if (!srcComponentsExisted) track(path.resolve("src/components"));
+    const srcPagesExisted = fs.existsSync("src/pages");
+    fs.mkdirSync("src/pages", { recursive: true });
+    if (!srcPagesExisted) track(path.resolve("src/pages"));
+    const srcHooksExisted = fs.existsSync("src/hooks");
+    fs.mkdirSync("src/hooks", { recursive: true });
+    if (!srcHooksExisted) track(path.resolve("src/hooks"));
+    const srcContextExisted = fs.existsSync("src/context");
+    fs.mkdirSync("src/context", { recursive: true });
+    if (!srcContextExisted) track(path.resolve("src/context"));
+    const srcServicesExisted = fs.existsSync("src/services");
+    fs.mkdirSync("src/services", { recursive: true });
+    if (!srcServicesExisted) track(path.resolve("src/services"));
+    const srcUtilsExisted = fs.existsSync("src/utils");
+    fs.mkdirSync("src/utils", { recursive: true });
+    if (!srcUtilsExisted) track(path.resolve("src/utils"));
 
     copyTemplate(
       "build-info.js",
@@ -795,25 +816,14 @@ async function stepStyleguide() {
     return;
   }
   console.log(YELLOW + "🎨 Setting up styleguide..." + RESET);
-  copyTemplate(
-    "styleguide.scss",
-    path.resolve("assets/styles/styleguide.scss"),
-    {},
-  );
+  fs.mkdirSync(path.resolve("src/styles/components"), { recursive: true });
+  copyTemplate("styleguide.scss", path.resolve("src/styles/styleguide.scss"), {});
+  copyTemplate("base.scss", path.resolve("src/styles/base.scss"), {});
   if (framework === "vite") {
-    copyTemplate(
-      "vite/style.scss",
-      path.resolve("assets/styles/style.scss"),
-      {},
-    );
+    copyTemplate("vite/styles.scss", path.resolve("src/styles/styles.scss"), {});
   }
   if (framework === "react") {
-    copyTemplate(
-      "react/index.scss",
-      path.resolve("assets/styles/index.scss"),
-      {},
-    );
-    copyTemplate("react/App.scss", path.resolve("assets/styles/App.scss"), {});
+    copyTemplate("react/styles.scss", path.resolve("src/styles/styles.scss"), {});
   }
   console.log(GREEN + "✅ Styleguide ready." + RESET);
   setupStyleguide = true;
@@ -897,9 +907,9 @@ async function stepPwa() {
 
   copyTemplate(
     framework === "vite"
-      ? "vite/vite.config.pwa.js"
-      : "react/vite.config.pwa.js",
-    path.resolve("vite.config.js"),
+      ? "vite/vite.config.ts"
+      : "react/vite.config.ts",
+    path.resolve("vite.config.ts"),
     {},
   );
 
@@ -1179,8 +1189,21 @@ async function upgradePatch() {
     console.log(GREEN + "✅ Added .prettierrc" + RESET);
   }
 
+  if (!fs.existsSync(path.resolve("tsconfig.json"))) {
+    copyTemplate(
+      framework === "vite" ? "vite/tsconfig.json" : "react/tsconfig.json",
+      path.resolve("tsconfig.json"),
+      {},
+    );
+    console.log(GREEN + "✅ Added tsconfig.json" + RESET);
+  }
+
   // Step 4: ensure styleguide is set up
-  const styleguidePath = path.resolve("assets/styles/styleguide.scss");
+  // Detect whether project uses src/styles/ (new) or assets/styles/ (old)
+  const stylesDir = fs.existsSync(path.resolve("src/styles"))
+    ? path.resolve("src/styles")
+    : path.resolve("assets/styles");
+  const styleguidePath = path.join(stylesDir, "styleguide.scss");
   const styleguideExisted = fs.existsSync(styleguidePath);
   const styleguideContentBefore = styleguideExisted
     ? fs.readFileSync(styleguidePath, "utf8")
@@ -1188,48 +1211,50 @@ async function upgradePatch() {
   let styleguideChanged = false;
 
   if (!styleguideExisted) {
-    fs.mkdirSync(path.resolve("assets/styles"), { recursive: true });
+    fs.mkdirSync(path.join(stylesDir, "components"), { recursive: true });
     copyTemplate("styleguide.scss", styleguidePath, {});
+    copyTemplate("base.scss", path.join(stylesDir, "base.scss"), {});
     console.log(GREEN + "✅ Added styleguide.scss" + RESET);
 
     if (framework === "vite") {
-      const stylePath = path.resolve("assets/styles/style.scss");
-      if (!fs.existsSync(stylePath)) {
-        copyTemplate("vite/style.scss", stylePath, {});
+      // Support both old (style.scss) and new (styles.scss) filenames
+      const legacyPath = path.join(stylesDir, "style.scss");
+      const stylePath = path.join(stylesDir, "styles.scss");
+      const targetPath = fs.existsSync(legacyPath) ? legacyPath : stylePath;
+      if (!fs.existsSync(targetPath)) {
+        copyTemplate("vite/styles.scss", targetPath, {});
       } else {
-        let content = fs.readFileSync(stylePath, "utf8");
+        let content = fs.readFileSync(targetPath, "utf8");
         if (
           !content.includes("@use './styleguide'") &&
           !content.includes('@use "./styleguide"')
         ) {
-          fs.writeFileSync(stylePath, "@use './styleguide';\n" + content);
+          fs.writeFileSync(targetPath, "@use './styleguide';\n" + content);
           console.log(
-            YELLOW + "✏️  Added @use './styleguide' to style.scss" + RESET,
+            YELLOW + "✏️  Added @use './styleguide' to styles.scss" + RESET,
           );
         }
       }
     }
 
     if (framework === "react") {
-      const indexScssPath = path.resolve("assets/styles/index.scss");
-      if (!fs.existsSync(indexScssPath)) {
-        copyTemplate("react/index.scss", indexScssPath, {});
+      // Support both old (index.scss) and new (styles.scss) filenames
+      const legacyPath = path.join(stylesDir, "index.scss");
+      const stylesPath = path.join(stylesDir, "styles.scss");
+      const targetPath = fs.existsSync(legacyPath) ? legacyPath : stylesPath;
+      if (!fs.existsSync(targetPath)) {
+        copyTemplate("react/styles.scss", targetPath, {});
       } else {
-        let content = fs.readFileSync(indexScssPath, "utf8");
+        let content = fs.readFileSync(targetPath, "utf8");
         if (
           !content.includes("@use './styleguide'") &&
           !content.includes('@use "./styleguide"')
         ) {
-          fs.writeFileSync(indexScssPath, "@use './styleguide';\n" + content);
+          fs.writeFileSync(targetPath, "@use './styleguide';\n" + content);
           console.log(
-            YELLOW + "✏️  Added @use './styleguide' to index.scss" + RESET,
+            YELLOW + "✏️  Added @use './styleguide' to styles.scss" + RESET,
           );
         }
-      }
-
-      const appScssPath = path.resolve("assets/styles/App.scss");
-      if (!fs.existsSync(appScssPath)) {
-        copyTemplate("react/App.scss", appScssPath, {});
       }
     }
   }
