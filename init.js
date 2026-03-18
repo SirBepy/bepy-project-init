@@ -330,6 +330,11 @@ function detectMisplaced() {
       misplaced.push(`${name} → assets/scripts/${name}`);
     } else if (name.endsWith(".css") || name.endsWith(".scss")) {
       misplaced.push(`${name} → assets/styles/${name}`);
+    } else if (
+      (name.endsWith(".ts") || name.endsWith(".tsx")) &&
+      !name.endsWith(".d.ts")
+    ) {
+      misplaced.push(`${name} → src/${name}`);
     }
   }
 
@@ -339,6 +344,7 @@ function detectMisplaced() {
 function migrateLooseFiles() {
   fs.mkdirSync(path.resolve("assets/scripts"), { recursive: true });
   fs.mkdirSync(path.resolve("assets/styles"), { recursive: true });
+  fs.mkdirSync(path.resolve("src"), { recursive: true });
 
   const moves = [];
 
@@ -376,6 +382,11 @@ function migrateLooseFiles() {
       moveFile(src, "assets/scripts", name);
     } else if (name.endsWith(".css") || name.endsWith(".scss")) {
       moveFile(src, "assets/styles", name);
+    } else if (
+      (name.endsWith(".ts") || name.endsWith(".tsx")) &&
+      !name.endsWith(".d.ts")
+    ) {
+      moveFile(src, "src", name);
     }
   }
 
@@ -705,6 +716,13 @@ function stepScaffold() {
     fs.mkdirSync("src/assets", { recursive: true });
     if (!srcAssetsExisted) track(path.resolve("src/assets"));
 
+    // Stub entry stylesheet — overwritten by stepStyleguide if enabled
+    const stylesStubPath = path.resolve("src/styles/styles.scss");
+    if (!fs.existsSync(stylesStubPath)) {
+      fs.writeFileSync(stylesStubPath, "/* Styles */\n");
+      track(stylesStubPath);
+    }
+
     copyTemplate("vite/app.ts", path.resolve("src/app.ts"), {});
     copyTemplate(
       "build-info.js",
@@ -771,6 +789,13 @@ function stepScaffold() {
     const srcUtilsExisted = fs.existsSync("src/utils");
     fs.mkdirSync("src/utils", { recursive: true });
     if (!srcUtilsExisted) track(path.resolve("src/utils"));
+
+    // Stub entry stylesheet — overwritten by stepStyleguide if enabled
+    const stylesStubPath = path.resolve("src/styles/styles.scss");
+    if (!fs.existsSync(stylesStubPath)) {
+      fs.writeFileSync(stylesStubPath, "/* Styles */\n");
+      track(stylesStubPath);
+    }
 
     copyTemplate(
       "build-info.js",
