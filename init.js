@@ -148,12 +148,12 @@ function runClaudeCli(promptFile) {
   }
 
   try {
-    execSync(`claude < "${promptPath}"`, { stdio: "inherit" });
+    execSync(`claude -p < "${promptPath}"`, { stdio: "inherit" });
     return true;
   } catch (e) {
     console.log(RED + "❌ Claude CLI call failed." + RESET);
     console.log(
-      YELLOW + `💡 Run it manually: claude < "${promptPath}"` + RESET,
+      YELLOW + `💡 Run it manually: claude -p < "${promptPath}"` + RESET,
     );
     return false;
   }
@@ -593,7 +593,6 @@ async function stepProjectName() {
     }
   }
   projectName = name;
-  projectDescription = await prompt("Project description? (optional)", "");
 }
 
 function isWebFramework(fw) {
@@ -1472,7 +1471,7 @@ async function stepHtmlAiSetup() {
 
   console.log(YELLOW + "🤖 Running AI setup via Claude CLI..." + RESET);
   try {
-    execSync(`claude < "${tempPromptPath}"`, { stdio: "inherit" });
+    execSync(`claude -p < "${tempPromptPath}"`, { stdio: "inherit" });
     const committed = commitIfDirty("CHORE: AI project setup");
     if (!committed) {
       console.log(YELLOW + "⚠️  AI setup ran but nothing to commit." + RESET);
