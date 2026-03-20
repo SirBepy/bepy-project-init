@@ -6,7 +6,7 @@ The project has:
 - `index.html`
 - `src/styles.css`
 - `src/script.js`
-- `src/themes/` — theme CSS files (theme-void.css, theme-cosmo.css, theme-glacier.css, theme-nebula.css)
+- `assets/styles/themes/` — theme CSS files (theme-void.css, theme-cosmo.css, theme-glacier.css, theme-nebula.css)
 - `.github/workflows/deploy.yml` — deploys to GitHub Pages on push to main
 - `.prettierrc` and `.gitignore`
 
@@ -64,10 +64,10 @@ Infer description from the project. Place all meta tags inside `<head>`.
 
 ## Step 4 — Theme
 
-Read `index.html`. If there is no `<link>` pointing to any file in `src/themes/`, add this inside `<head>` **before** the `src/styles.css` link:
+Read `index.html`. If there is no `<link>` pointing to any file in `assets/styles/themes/`, add this inside `<head>` **before** the `src/styles.css` link:
 
 ```html
-<link rel="stylesheet" href="src/themes/theme-void.css">
+<link rel="stylesheet" href="assets/styles/themes/theme-void.css">
 ```
 
 If a theme link is already present, leave it alone.

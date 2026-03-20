@@ -1423,16 +1423,16 @@ async function stepScaffoldHtml() {
     track(path.resolve("src/script.js"));
   }
 
-  // Copy themes to src/themes/
+  // Copy themes to assets/styles/themes/ (matches what settings.js expects)
   const themesDir = path.join(scriptDir, "themes");
   if (fs.existsSync(themesDir)) {
-    const destThemesDir = path.resolve("src/themes");
+    const destThemesDir = path.resolve("assets/styles/themes");
     fs.mkdirSync(destThemesDir, { recursive: true });
-    track(destThemesDir);
+    track(path.resolve("assets"));
     for (const f of fs.readdirSync(themesDir)) {
       fs.copyFileSync(path.join(themesDir, f), path.join(destThemesDir, f));
     }
-    console.log(GREEN + "✅ Themes copied → src/themes/" + RESET);
+    console.log(GREEN + "✅ Themes copied → assets/styles/themes/" + RESET);
   }
 
   // GitHub Pages deploy workflow
