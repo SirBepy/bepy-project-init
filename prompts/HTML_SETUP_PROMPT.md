@@ -87,13 +87,13 @@ If something is already fixed/absolute in the top-right, insert this line BEFORE
 
 Open `src/styles.css`. Rewrite it so the page uses the CSS custom properties injected by the settings widget. Rules:
 
-1. Replace any hardcoded background colors with `var(--color-background)`
+1. **Backgrounds:** If the page has an animated gradient, multi-stop gradient, or decorative background effect, keep the effect but replace the hardcoded colors inside it with theme palette colors (`var(--color-primary)`, `var(--color-secondary)`, `var(--color-background)`, `var(--color-surface)`, etc.). Do not flatten a gradient into a solid color. If the background is already a plain solid color, replace it with `var(--color-background)`.
 2. Replace any hardcoded surface/card colors with `var(--color-surface)` or `var(--color-surface-alt)`
 3. Replace any hardcoded text colors with `var(--color-text)` or `var(--color-text-muted)`
 4. Replace any hardcoded border colors with `var(--color-border)`
 5. Replace any hardcoded accent/highlight colors with `var(--color-primary)` or `var(--color-secondary)`
 6. Replace any hardcoded `font-family` declarations with `var(--font-body)` or `var(--font-heading)` as appropriate
-7. Add `body { background: var(--color-background); color: var(--color-text); font-family: var(--font-body); }` if not already present
+7. Add `body { color: var(--color-text); font-family: var(--font-body); }` if not already present (omit `background` here if the page already has a custom background rule)
 8. Keep all layout, spacing, sizing, and structural rules exactly as they are — only replace color and font values
 
 If the project has no styles yet (file is empty or just a comment), write a clean base that uses the variables for background, text, and fonts.
