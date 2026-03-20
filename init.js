@@ -1456,63 +1456,40 @@ async function stepScaffoldHtml() {
 async function stepHtmlAiSetup() {
   const templatePath = path.join(scriptDir, "prompts", "HTML_SETUP_PROMPT.md");
   const svgToPngPath = path.join(scriptDir, "svg-to-png.js");
+  const widgetSrc = path.join(scriptDir, "widget", "settings.js");
 
   const answer = await prompt("Run AI setup now? (y/n)", "n");
   if (answer.toLowerCase() !== "y") {
-    console.log(YELLOW + `💡 Run it later: claude -p < "${templatePath}"` + RESET);
+    console.log(YELLOW + `💡 Run it later: claude --dangerously-skip-permissions -p < "${templatePath}"` + RESET);
     return;
   }
 
-  const cwd = process.cwd();
   const setupPromptPath = path.resolve(".bepy-setup.md");
-  const signalFile = path.resolve(".bepy-ai-done");
-  const scriptPath = path.resolve(".bepy-setup.ps1");
+  const scriptPath = path.join(os.tmpdir(), "bepy-setup.ps1");
 
-  // Write substituted prompt into the project dir
   const promptContent = fs.readFileSync(templatePath, "utf8")
     .replaceAll("{{SVG_TO_PNG_PATH}}", svgToPngPath)
-    + "\n\n---\n\nWhen you have completed ALL tasks above, create a file `.bepy-ai-done` in the current directory with any content. This signals the tool that you are finished.\n";
+    .replaceAll("{{WIDGET_SRC}}", widgetSrc);
   fs.writeFileSync(setupPromptPath, promptContent);
-  fs.rmSync(signalFile, { force: true });
 
-  // PowerShell launcher script:
-  // reads prompt content into a variable (avoids stdin redirection issues),
-  // passes it to claude -p as an argument, then writes the signal file
-  const cwdEscaped = cwd.replace(/'/g, "''");
+  const promptPathEscaped = setupPromptPath.replace(/'/g, "''");
   fs.writeFileSync(scriptPath,
-    `Set-Location '${cwdEscaped}'\n` +
-    `$prompt = Get-Content -Raw '.bepy-setup.md'\n` +
-    `claude -p $prompt\n` +
-    `'done' | Out-File -FilePath '.bepy-ai-done' -Encoding utf8\n`
+    `$prompt = Get-Content -Raw '${promptPathEscaped}'\n` +
+    `claude --dangerously-skip-permissions -p $prompt\n`
   );
 
-  console.log(YELLOW + "🤖 Opening AI setup in a new terminal..." + RESET);
-  console.log(YELLOW + "⏳ Watching for .bepy-ai-done to know when it's done..." + RESET);
-
-  const scriptPathEscaped = scriptPath.replace(/'/g, "''");
-  execSync(
-    `Start-Process powershell -ArgumentList @('-NoExit', '-ExecutionPolicy', 'Bypass', '-File', '${scriptPathEscaped}')`,
-    { shell: "powershell.exe" }
-  );
-
-  // Poll for signal file (15 min timeout)
-  await new Promise((resolve, reject) => {
-    const start = Date.now();
-    const check = () => {
-      if (fs.existsSync(signalFile)) return resolve();
-      if (Date.now() - start > 15 * 60 * 1000) return reject(new Error("AI setup timed out after 15 minutes."));
-      setTimeout(check, 1000);
-    };
-    check();
-  });
-
-  fs.rmSync(signalFile, { force: true });
-  fs.rmSync(setupPromptPath, { force: true });
-  fs.rmSync(scriptPath, { force: true });
-
-  const committed = commitIfDirty("CHORE: AI project setup");
-  if (!committed) console.log(YELLOW + "⚠️  Nothing to commit after AI setup." + RESET);
-  console.log(GREEN + "✅ AI setup complete." + RESET);
+  console.log(YELLOW + "🤖 Running AI setup..." + RESET);
+  try {
+    execSync(`powershell -ExecutionPolicy Bypass -File "${scriptPath}"`, { stdio: "inherit" });
+    const committed = commitIfDirty("CHORE: AI project setup");
+    if (!committed) console.log(YELLOW + "⚠️  Nothing to commit after AI setup." + RESET);
+    console.log(GREEN + "✅ AI setup complete." + RESET);
+  } catch (e) {
+    console.log(YELLOW + "⚠️  AI setup failed: " + e.message + RESET);
+  } finally {
+    fs.rmSync(setupPromptPath, { force: true });
+    fs.rmSync(scriptPath, { force: true });
+  }
 }
 
 // ─── Main entry point ──────────────────────────────────────────────────────────

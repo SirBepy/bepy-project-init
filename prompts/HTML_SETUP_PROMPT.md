@@ -13,6 +13,8 @@ The project has:
 The SVG-to-PNG converter is at: `{{SVG_TO_PNG_PATH}}`
 Usage: `node "{{SVG_TO_PNG_PATH}}" <input.svg> <output.png> <size>`
 
+The settings widget source file is at: `{{WIDGET_SRC}}`
+
 ---
 
 ## Step 1 — Favicon
@@ -62,17 +64,39 @@ Infer description from the project. Place all meta tags inside `<head>`.
 
 ## Step 4 — Theme
 
-Add the void theme to `index.html`. Inside `<head>`, add this **before** the `src/styles.css` link:
+Read `index.html`. If there is no `<link>` pointing to any file in `src/themes/`, add this inside `<head>` **before** the `src/styles.css` link:
 
 ```html
 <link rel="stylesheet" href="src/themes/theme-void.css">
 ```
 
-If it's already there, skip this step.
+If a theme link is already present, leave it alone.
 
 ---
 
-## Step 5 — Portfolio data
+## Step 5 — Settings widget
+
+Copy the file at `{{WIDGET_SRC}}` to `src/settings.js` in the current project.
+
+Then open `index.html` and look at the existing layout:
+- If there is already exactly one element positioned in the **top-right corner** (fixed or absolute), add the widget to the **top-left** instead
+- Otherwise, add it to the **top-right** (the widget defaults to top-right)
+
+Add this near the bottom of `<body>`, just before `</body>`, with a comment so it's easy to disable:
+
+```html
+<!-- Settings widget — comment out to disable -->
+<script src="src/settings.js"></script>
+```
+
+If the widget needs to go to a non-default corner, also add this before the script tag:
+```html
+<script>window.__SETTINGS_CORNER = 'top-left';</script>
+```
+
+---
+
+## Step 6 — Portfolio data
 
 Generate portfolio data for this project. Create two files:
 
