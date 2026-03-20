@@ -1006,7 +1006,7 @@ function stepFinalize() {
 async function stepAiSetup() {
   try {
     const promptPath = path.join(scriptDir, "prompts", "SETUP_PROMPT.md");
-    const answer = await prompt("Run AI setup now? (y/n)", "n");
+    const answer = await prompt("Run AI setup now? (y/n)", "y");
     if (answer.toLowerCase() !== "y") {
       console.log(
         YELLOW + `💡 Run it later: claude < "${promptPath}"` + RESET,
@@ -1458,7 +1458,7 @@ async function stepHtmlAiSetup() {
   const svgToPngPath = path.join(scriptDir, "svg-to-png.js");
   const widgetSrc = path.join(scriptDir, "widget", "settings.js");
 
-  const answer = await prompt("Run AI setup now? (y/n)", "n");
+  const answer = await prompt("Run AI setup now? (y/n)", "y");
   if (answer.toLowerCase() !== "y") {
     console.log(YELLOW + `💡 Run it later: claude --dangerously-skip-permissions -p < "${templatePath}"` + RESET);
     return;
