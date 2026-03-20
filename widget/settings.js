@@ -10,6 +10,8 @@
   const FEEDBACK_URL = "https://forms.gle/AGPabTu624aMaayE7";
   const FALLBACK_THEMES = ["void", "glacier", "cosmo", "nebula"];
   const LS_KEY = "tabs-labs-theme";
+  const LOCAL_THEMES = "/assets/styles/themes/";
+  const CDN_THEMES = "https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/themes/";
 
   // ─── DOM element references (set during renderPanel) ──────────────────────
 
@@ -177,7 +179,7 @@
 
     elAppName = document.createElement("div");
     elAppName.className = "tl-app-name";
-    elAppName.textContent = "—";
+    elAppName.textContent = "";
     elPanel.appendChild(elAppName);
 
     elAppDesc = document.createElement("div");
@@ -244,7 +246,7 @@
     const feedbackText = document.createElement("div");
     feedbackText.className = "tl-feedback-text";
     feedbackText.textContent =
-      "Help improve this toolkit — share your thoughts.";
+      "Help improve this toolkit: share your thoughts.";
     elPanel.appendChild(feedbackText);
 
     const feedbackBtn = document.createElement("a");
@@ -294,32 +296,43 @@
   // ─── 5. Theme application ─────────────────────────────────────────────────
 
   async function applyTheme(name) {
-    try {
-      const res = await fetch("/assets/styles/themes/theme-" + name + ".css");
+    async function fetchCss(base) {
+      const res = await fetch(base + "theme-" + name + ".css");
       if (!res.ok) throw new Error("fetch failed");
-      const css = await res.text();
-      let el = document.getElementById("tl-active-theme");
-      if (el) {
-        el.textContent = css;
-      } else {
-        el = document.createElement("style");
-        el.id = "tl-active-theme";
-        el.textContent = css;
-        document.head.appendChild(el);
-      }
-      document.documentElement.setAttribute("data-theme", name);
-      localStorage.setItem(LS_KEY, name);
-      const prev = elThemeBtns.querySelector(".tl-theme-error");
-      if (prev) prev.remove();
-    } catch (_) {
-      let err = elThemeBtns.querySelector(".tl-theme-error");
-      if (!err) {
-        err = document.createElement("div");
-        err.className = "tl-theme-error";
-        elThemeBtns.appendChild(err);
-      }
-      err.textContent = '⚠ Could not load theme "' + name + '".';
+      return res.text();
     }
+
+    let css;
+    try {
+      css = await fetchCss(LOCAL_THEMES);
+    } catch (_) {
+      try {
+        css = await fetchCss(CDN_THEMES);
+      } catch (_) {
+        let err = elThemeBtns.querySelector(".tl-theme-error");
+        if (!err) {
+          err = document.createElement("div");
+          err.className = "tl-theme-error";
+          elThemeBtns.appendChild(err);
+        }
+        err.textContent = '⚠ Could not load theme "' + name + '".';
+        return;
+      }
+    }
+
+    let el = document.getElementById("tl-active-theme");
+    if (el) {
+      el.textContent = css;
+    } else {
+      el = document.createElement("style");
+      el.id = "tl-active-theme";
+      el.textContent = css;
+      document.head.appendChild(el);
+    }
+    document.documentElement.setAttribute("data-theme", name);
+    localStorage.setItem(LS_KEY, name);
+    const prev = elThemeBtns.querySelector(".tl-theme-error");
+    if (prev) prev.remove();
   }
 
   // ─── 6. Theme button rendering ────────────────────────────────────────────
@@ -356,8 +369,9 @@
   // ─── 7. Theme list fetch ──────────────────────────────────────────────────
 
   async function loadThemeList() {
+    // Try local directory listing
     try {
-      const res = await fetch("/assets/styles/themes/");
+      const res = await fetch(LOCAL_THEMES);
       if (res.ok) {
         const html = await res.text();
         const matches = html.match(/theme-([a-z0-9-]+)\.css/gi) || [];
@@ -373,44 +387,66 @@
         }
       }
     } catch (_) {}
-    const available = (
+
+    // Probe local individual files
+    const localAvailable = (
       await Promise.all(
         FALLBACK_THEMES.map(function (name) {
-          return fetch("/assets/styles/themes/theme-" + name + ".css").then(
-            function (r) {
-              return r.ok ? name : null;
-            },
-            function () {
-              return null;
-            },
+          return fetch(LOCAL_THEMES + "theme-" + name + ".css").then(
+            function (r) { return r.ok ? name : null; },
+            function () { return null; },
           );
         }),
       )
     ).filter(Boolean);
-    renderThemeButtons(available);
+
+    if (localAvailable.length > 0) {
+      renderThemeButtons(localAvailable);
+      return;
+    }
+
+    // Fall back to CDN
+    const cdnAvailable = (
+      await Promise.all(
+        FALLBACK_THEMES.map(function (name) {
+          return fetch(CDN_THEMES + "theme-" + name + ".css").then(
+            function (r) { return r.ok ? name : null; },
+            function () { return null; },
+          );
+        }),
+      )
+    ).filter(Boolean);
+
+    renderThemeButtons(cdnAvailable);
   }
 
   // ─── 8. Restore saved theme (fire-and-forget) ─────────────────────────────
 
   function restoreSavedTheme() {
     const saved = localStorage.getItem(LS_KEY) || "void";
-    fetch("/assets/styles/themes/theme-" + saved + ".css")
-      .then(function (r) {
-        return r.ok ? r.text() : Promise.reject();
-      })
-      .then(function (css) {
-        let el = document.getElementById("tl-active-theme");
-        if (el) {
-          el.textContent = css;
-        } else {
-          el = document.createElement("style");
-          el.id = "tl-active-theme";
-          el.textContent = css;
-          document.head.appendChild(el);
-        }
-        document.documentElement.setAttribute("data-theme", saved);
-      })
-      .catch(function () {});
+
+    function applyCss(css) {
+      let el = document.getElementById("tl-active-theme");
+      if (el) {
+        el.textContent = css;
+      } else {
+        el = document.createElement("style");
+        el.id = "tl-active-theme";
+        el.textContent = css;
+        document.head.appendChild(el);
+      }
+      document.documentElement.setAttribute("data-theme", saved);
+    }
+
+    fetch(LOCAL_THEMES + "theme-" + saved + ".css")
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+      .then(applyCss)
+      .catch(function () {
+        fetch(CDN_THEMES + "theme-" + saved + ".css")
+          .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+          .then(applyCss)
+          .catch(function () {});
+      });
   }
 
   // ─── 9. App info fetch ────────────────────────────────────────────────────
@@ -430,7 +466,7 @@
           : "";
       appDesc = "";
     }
-    elAppName.textContent = appName || "—";
+    elAppName.textContent = appName || "";
     elAppDesc.textContent = appDesc;
   }
 

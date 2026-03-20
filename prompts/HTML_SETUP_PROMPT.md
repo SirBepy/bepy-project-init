@@ -13,8 +13,6 @@ The project has:
 The SVG-to-PNG converter is at: `{{SVG_TO_PNG_PATH}}`
 Usage: `node "{{SVG_TO_PNG_PATH}}" <input.svg> <output.png> <size>`
 
-The settings widget source file is at: `{{WIDGET_SRC}}`
-
 ---
 
 ## Step 1 — Favicon
@@ -62,29 +60,16 @@ Infer description from the project. Place all meta tags inside `<head>`.
 
 ---
 
-## Step 4 — Theme
-
-Read `index.html`. If there is no `<link>` pointing to any file in `assets/styles/themes/`, add this inside `<head>` **before** the `src/styles.css` link:
-
-```html
-<link rel="stylesheet" href="assets/styles/themes/theme-void.css">
-```
-
-If a theme link is already present, leave it alone.
-
----
-
-## Step 5 — Settings widget
+## Step 4 — Settings widget
 
 **This step is required. Do not skip it.**
 
-1. Copy the file at `{{WIDGET_SRC}}` to `src/settings.js`
-2. Read `index.html` and check if there is already an element with `position: fixed` or `position: absolute` in the top-right corner
-3. Add the following lines to `index.html` just before `</body>`. This is mandatory:
+1. Read `index.html` and check if there is already an element with `position: fixed` or `position: absolute` in the top-right corner
+2. Add the following lines to `index.html` just before `</body>`. This is mandatory:
 
 ```html
 <!-- Settings widget - comment out to disable -->
-<script src="src/settings.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/settings.js"></script>
 ```
 
 If something is already fixed/absolute in the top-right, insert this line BEFORE the script tag to move the widget:
@@ -95,7 +80,7 @@ If something is already fixed/absolute in the top-right, insert this line BEFORE
 
 ---
 
-## Step 6 — Portfolio data
+## Step 5 — Portfolio data
 
 Generate portfolio data for this project. Create two files:
 

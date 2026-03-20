@@ -1423,18 +1423,6 @@ async function stepScaffoldHtml() {
     track(path.resolve("src/script.js"));
   }
 
-  // Copy themes to assets/styles/themes/ (matches what settings.js expects)
-  const themesDir = path.join(scriptDir, "themes");
-  if (fs.existsSync(themesDir)) {
-    const destThemesDir = path.resolve("assets/styles/themes");
-    fs.mkdirSync(destThemesDir, { recursive: true });
-    track(path.resolve("assets"));
-    for (const f of fs.readdirSync(themesDir)) {
-      fs.copyFileSync(path.join(themesDir, f), path.join(destThemesDir, f));
-    }
-    console.log(GREEN + "✅ Themes copied → assets/styles/themes/" + RESET);
-  }
-
   // GitHub Pages deploy workflow
   const workflowDir = path.resolve(".github/workflows");
   fs.mkdirSync(workflowDir, { recursive: true });
@@ -1456,7 +1444,6 @@ async function stepScaffoldHtml() {
 async function stepHtmlAiSetup() {
   const templatePath = path.join(scriptDir, "prompts", "HTML_SETUP_PROMPT.md");
   const svgToPngPath = path.join(scriptDir, "svg-to-png.js");
-  const widgetSrc = path.join(scriptDir, "widget", "settings.js");
 
   const answer = await prompt("Run AI setup now? (y/n)", "y");
   if (answer.toLowerCase() !== "y") {
@@ -1468,8 +1455,7 @@ async function stepHtmlAiSetup() {
   const scriptPath = path.join(os.tmpdir(), "bepy-setup.ps1");
 
   const promptContent = fs.readFileSync(templatePath, "utf8")
-    .replaceAll("{{SVG_TO_PNG_PATH}}", svgToPngPath)
-    .replaceAll("{{WIDGET_SRC}}", widgetSrc);
+    .replaceAll("{{SVG_TO_PNG_PATH}}", svgToPngPath);
   fs.writeFileSync(setupPromptPath, promptContent);
 
   const promptPathEscaped = setupPromptPath.replace(/'/g, "''");
