@@ -44,90 +44,12 @@
     }
 
     /* ============================================================
-       THEME SWITCHER
-    ============================================================ */
-    .theme-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      background: var(--color-surface);
-      border-bottom: 1px solid var(--color-border);
-      padding: 0.75rem var(--spacing-md);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .theme-bar-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--color-text-muted);
-      white-space: nowrap;
-    }
-
-    .theme-buttons {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .theme-btn {
-      padding: 0.4rem 1rem;
-      border-radius: 9999px;
-      border: 1px solid var(--color-border);
-      background: transparent;
-      color: var(--color-text-muted);
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .theme-btn:hover {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-
-    .theme-btn.active {
-      background: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-background);
-      font-weight: 700;
-    }
-
-    .theme-divider {
-      width: 1px;
-      height: 22px;
-      background: var(--color-border);
-      margin: 0 0.25rem;
-      flex-shrink: 0;
-    }
-
-    .theme-btn.fav {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-
-    .theme-btn.fav:hover {
-      background: var(--color-primary);
-      color: var(--color-background);
-    }
-
-    /* ============================================================
        LAYOUT
     ============================================================ */
     .page {
       max-width: 900px;
       margin: 0 auto;
-      padding: calc(64px + var(--spacing-xl)) var(--spacing-md) var(--spacing-xl);
+      padding: var(--spacing-xl) var(--spacing-md);
     }
 
     .section {
@@ -657,6 +579,33 @@
     }
 
     /* ============================================================
+       CDN TOGGLE
+    ============================================================ */
+    .cdn-toggle {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      z-index: 9999;
+      background: var(--color-surface, #1e1d2b);
+      border: 1px solid var(--color-border, #2d2c44);
+      border-radius: 9999px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.72rem;
+      font-family: var(--font-mono, monospace);
+      color: var(--color-text-muted, #6b6990);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .cdn-toggle:hover {
+      border-color: var(--color-primary, #9d7dfc);
+      color: var(--color-primary, #9d7dfc);
+    }
+    .cdn-toggle.active {
+      border-color: var(--color-primary, #9d7dfc);
+      color: var(--color-primary, #9d7dfc);
+    }
+
+    /* ============================================================
        SCROLLBAR
     ============================================================ */
     ::-webkit-scrollbar { width: 6px; }
@@ -667,18 +616,7 @@
 </head>
 <body>
 
-  <!-- THEME BAR -->
-  <div class="theme-bar">
-    <span class="theme-bar-label">Favorites</span>
-    <div class="theme-buttons">
-      <button class="theme-btn fav active" data-theme="void">🕳️ Void</button>
-      <button class="theme-btn fav" data-theme="glacier">🧊 Glacier</button>
-      <div class="theme-divider"></div>
-      <span class="theme-bar-label">Others</span>
-      <button class="theme-btn" data-theme="cosmo">🌶️ Cosmo</button>
-      <button class="theme-btn" data-theme="nebula">🌌 Nebula</button>
-    </div>
-  </div>
+  <button class="cdn-toggle" id="cdn-toggle" type="button">Use CDN</button>
 
   <div class="page">
 
@@ -689,7 +627,7 @@
         <span id="theme-label">void</span>
       </div>
       <h1>Joe's Styleguide</h1>
-      <p>A living reference for colors, typography, and reusable components. Switch themes above to preview different directions.</p>
+      <p>A living reference for colors, typography, and reusable components. Use the ⚙️ settings panel to switch themes.</p>
     </div>
 
     <!-- COLORS -->
@@ -948,18 +886,45 @@
   </div><!-- /page -->
 
   <script>
-    const buttons = document.querySelectorAll('.theme-btn');
-    const label = document.getElementById('theme-label');
-
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const theme = btn.dataset.theme;
-        document.documentElement.setAttribute('data-theme', theme);
-        label.textContent = theme;
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    // Keep theme-label in sync with data-theme changes from settings.js
+    (function () {
+      var label = document.getElementById('theme-label');
+      if (!label) return;
+      var update = function () {
+        label.textContent = document.documentElement.getAttribute('data-theme') || 'void';
+      };
+      update();
+      new MutationObserver(update).observe(document.documentElement, {
+        attributes: true, attributeFilter: ['data-theme']
       });
-    });
+    })();
+
+    // CDN toggle
+    (function () {
+      var isCdn = new URLSearchParams(location.search).has('cdn');
+      var btn = document.getElementById('cdn-toggle');
+      if (isCdn) {
+        btn.textContent = 'Using CDN';
+        btn.classList.add('active');
+      }
+      btn.addEventListener('click', function () {
+        location.href = isCdn ? location.pathname : location.pathname + '?cdn=1';
+      });
+    })();
+
+    // Load widget scripts
+    (function () {
+      var isCdn = new URLSearchParams(location.search).has('cdn');
+      var base = isCdn
+        ? 'https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/'
+        : 'widget/';
+      if (!isCdn) window.BEPY_BG_PATTERN = 'widget/background_pattern.svg';
+      ['background.js', 'settings.js'].forEach(function (file) {
+        var s = document.createElement('script');
+        s.src = base + file;
+        document.body.appendChild(s);
+      });
+    })();
   </script>
 </body>
 </html>
