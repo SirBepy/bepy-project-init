@@ -28,26 +28,35 @@
       height: 100%;
       background: radial-gradient(
         ellipse at 50% 60%,
-        color-mix(in srgb, var(--color-primary, #9d7dfc) 70%, white) 0%,
-        color-mix(in srgb, var(--color-primary, #9d7dfc) 30%, black) 100%
+        var(--color-background) 0%,
+        var(--color-background) 200%
       );
     }
 
     #bepy-bg-pattern {
       position: absolute;
       inset: 0;
-      background-image: url("${patternUrl}");
-      background-size: 10%;
       opacity: 0.08;
-      animation: bepy-pan 180s linear infinite;
-      will-change: background-position;
-      -webkit-mask-image: radial-gradient(circle, black 40%, transparent 80%);
-      mask-image: radial-gradient(circle, black 40%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 60%, black 40%, transparent 80%);
+      mask-image: radial-gradient(ellipse at 50% 60%, black 40%, transparent 80%);
+    }
+
+    #bepy-bg-pattern::before {
+      content: '';
+      position: absolute;
+      inset: -200px;
+      background: var(--color-primary, #9d7dfc);
+      -webkit-mask-image: url("${patternUrl}");
+      mask-image: url("${patternUrl}");
+      -webkit-mask-size: 120px 120px;
+      mask-size: 120px 120px;
+      animation: bepy-pan 30s linear infinite;
+      will-change: transform;
     }
 
     @keyframes bepy-pan {
-      0%   { background-position: 0% 0%; }
-      100% { background-position: 100% -300%; }
+      0%   { transform: translate(0, 0); }
+      100% { transform: translate(120px, -240px); }
     }
   `;
 
