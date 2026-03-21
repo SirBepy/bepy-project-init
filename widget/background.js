@@ -5,8 +5,9 @@
 
   if (window.BEPY_BACKGROUND === false) return;
 
-  var CDN = "https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/";
-  var patternUrl = window.BEPY_BG_PATTERN || (CDN + "background_pattern.svg");
+  var CDN =
+    "https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/";
+  var patternUrl = window.BEPY_BG_PATTERN || CDN + "background_pattern.svg";
 
   // ─── Styles ───────────────────────────────────────────────────────────────
 
@@ -40,21 +41,13 @@
       opacity: 0.08;
       animation: bepy-pan 180s linear infinite;
       will-change: background-position;
+      -webkit-mask-image: radial-gradient(circle, black 40%, transparent 80%);
+      mask-image: radial-gradient(circle, black 40%, transparent 80%);
     }
 
     @keyframes bepy-pan {
       0%   { background-position: 0% 0%; }
       100% { background-position: 100% -300%; }
-    }
-
-    #bepy-bg-vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(
-        circle,
-        transparent 55%,
-        color-mix(in srgb, var(--color-primary, #9d7dfc) 20%, black) 100%
-      );
     }
   `;
 
@@ -65,13 +58,14 @@
 
   // ─── DOM ──────────────────────────────────────────────────────────────────
 
-  var bg       = document.createElement("div"); bg.id = "bepy-bg";
-  var fill     = document.createElement("div"); fill.id = "bepy-bg-fill";
-  var pattern  = document.createElement("div"); pattern.id = "bepy-bg-pattern";
-  var vignette = document.createElement("div"); vignette.id = "bepy-bg-vignette";
+  var bg = document.createElement("div");
+  bg.id = "bepy-bg";
+  var fill = document.createElement("div");
+  fill.id = "bepy-bg-fill";
+  var pattern = document.createElement("div");
+  pattern.id = "bepy-bg-pattern";
 
   fill.appendChild(pattern);
-  fill.appendChild(vignette);
   bg.appendChild(fill);
 
   // ─── Mount ────────────────────────────────────────────────────────────────
