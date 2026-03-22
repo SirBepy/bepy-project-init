@@ -10,7 +10,6 @@
   const FEEDBACK_URL = "https://forms.gle/AGPabTu624aMaayE7";
   const FALLBACK_THEMES = ["void", "glacier", "cosmo", "nebula"];
   const LS_KEY = "tabs-labs-theme";
-  const LOCAL_THEMES = "/assets/styles/themes/";
   const CDN_THEMES = "https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/themes/";
 
   // ─── DOM element references (set during renderPanel) ──────────────────────
@@ -307,20 +306,16 @@
 
     let css;
     try {
-      css = await fetchCss(LOCAL_THEMES);
+      css = await fetchCss(CDN_THEMES);
     } catch (_) {
-      try {
-        css = await fetchCss(CDN_THEMES);
-      } catch (_) {
-        let err = elThemeBtns.querySelector(".tl-theme-error");
-        if (!err) {
-          err = document.createElement("div");
-          err.className = "tl-theme-error";
-          elThemeBtns.appendChild(err);
-        }
-        err.textContent = '⚠ Could not load theme "' + name + '".';
-        return;
+      let err = elThemeBtns.querySelector(".tl-theme-error");
+      if (!err) {
+        err = document.createElement("div");
+        err.className = "tl-theme-error";
+        elThemeBtns.appendChild(err);
       }
+      err.textContent = '⚠ Could not load theme "' + name + '".';
+      return;
     }
 
     let el = document.getElementById("tl-active-theme");
@@ -372,43 +367,6 @@
   // ─── 7. Theme list fetch ──────────────────────────────────────────────────
 
   async function loadThemeList() {
-    // Try local directory listing
-    try {
-      const res = await fetch(LOCAL_THEMES);
-      if (res.ok) {
-        const html = await res.text();
-        const matches = html.match(/theme-([a-z0-9-]+)\.css/gi) || [];
-        const names = matches.map(function (m) {
-          return m.replace(/^theme-/i, "").replace(/\.css$/i, "");
-        });
-        const unique = names.filter(function (v, i, a) {
-          return a.indexOf(v) === i;
-        });
-        if (unique.length > 0) {
-          renderThemeButtons(unique);
-          return;
-        }
-      }
-    } catch (_) {}
-
-    // Probe local individual files
-    const localAvailable = (
-      await Promise.all(
-        FALLBACK_THEMES.map(function (name) {
-          return fetch(LOCAL_THEMES + "theme-" + name + ".css").then(
-            function (r) { return r.ok ? name : null; },
-            function () { return null; },
-          );
-        }),
-      )
-    ).filter(Boolean);
-
-    if (localAvailable.length > 0) {
-      renderThemeButtons(localAvailable);
-      return;
-    }
-
-    // Fall back to CDN
     const cdnAvailable = (
       await Promise.all(
         FALLBACK_THEMES.map(function (name) {
@@ -441,15 +399,10 @@
       document.documentElement.setAttribute("data-theme", saved);
     }
 
-    fetch(LOCAL_THEMES + "theme-" + saved + ".css")
+    fetch(CDN_THEMES + "theme-" + saved + ".css")
       .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
       .then(applyCss)
-      .catch(function () {
-        fetch(CDN_THEMES + "theme-" + saved + ".css")
-          .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
-          .then(applyCss)
-          .catch(function () {});
-      });
+      .catch(function () {});
   }
 
   // ─── 9. App info fetch ────────────────────────────────────────────────────
