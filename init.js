@@ -1368,6 +1368,15 @@ async function stepScaffoldHtml() {
   fs.mkdirSync("src", { recursive: true });
   track(path.resolve("src"));
 
+  // If no index.html but exactly one .html file exists, treat it as index.html
+  if (!fs.existsSync("index.html")) {
+    const htmlFiles = fs.readdirSync(".").filter(f => f.endsWith(".html"));
+    if (htmlFiles.length === 1) {
+      console.log(YELLOW + `Renaming ${htmlFiles[0]} → index.html` + RESET);
+      fs.renameSync(htmlFiles[0], "index.html");
+    }
+  }
+
   if (fs.existsSync("index.html")) {
     let html = fs.readFileSync("index.html", "utf8");
 
