@@ -16,6 +16,18 @@ Usage: `node "{{SVG_TO_PNG_PATH}}" <input.svg> <output.png> <size>`
 
 ---
 
+## Step 0 — Split JavaScript if needed
+
+Read `src/script.js`. If it is large (over ~150 lines) or contains one or more big inline data structures (arrays of objects, lookup tables, static config), split it:
+
+- Move each large data structure to its own file, e.g. `src/data.js` or `src/data/flashcards.js`
+- Keep logic and UI code in `src/script.js`
+- Update `index.html` to load the new files with `<script>` tags in the right order (data files before script.js)
+
+Only split if there is a clear boundary. Do not split a small or simple script.
+
+---
+
 ## Step 1 — Favicon
 
 Check if `src/favicon.png` exists. If it doesn't:
