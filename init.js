@@ -674,11 +674,34 @@ function stepScaffold() {
 
   const before = new Set(fs.readdirSync("."));
 
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bepy-vite-"));
   execSync(
-    "npm create vite@latest . -- --template " +
+    "npm create vite@latest " +
+      tmpDir +
+      " -- --template " +
       (framework === "vite" ? "vanilla-ts" : "react-ts"),
     { stdio: "inherit" },
   );
+
+  // Copy scaffolded files to cwd (rename can fail across drives on Windows)
+  function copyRecursive(src, dest) {
+    const stat = fs.statSync(src);
+    if (stat.isDirectory()) {
+      fs.mkdirSync(dest, { recursive: true });
+      for (const child of fs.readdirSync(src)) {
+        copyRecursive(path.join(src, child), path.join(dest, child));
+      }
+    } else {
+      fs.copyFileSync(src, dest);
+    }
+  }
+  for (const entry of fs.readdirSync(tmpDir)) {
+    const src = path.join(tmpDir, entry);
+    const dest = path.resolve(entry);
+    if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
+    copyRecursive(src, dest);
+  }
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 
   const after = fs.readdirSync(".");
   for (const entry of after) {
@@ -848,6 +871,7 @@ function stepScaffold() {
   try {
     const pkgPath = path.resolve("package.json");
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+    pkg.name = projectName.toLowerCase().replace(/[^a-z0-9-]/g, "-");
     pkg.description = projectDescription;
     fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
   } catch (e) {
