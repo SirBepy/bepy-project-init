@@ -83,7 +83,9 @@ async function stepScaffoldHtml() {
   copyTemplate("html/deploy.yml", path.join(workflowDir, "deploy.yml"), {});
 
   mergeGitignore(path.resolve(".gitignore"));
-  copyTemplate(".prettierrc", path.resolve(".prettierrc"), {});
+  if (!fs.existsSync(".prettierrc")) {
+    copyTemplate(".prettierrc", path.resolve(".prettierrc"), {});
+  }
 
   if (!fs.existsSync(".git")) {
     console.log(YELLOW + "🔧 Initializing git..." + RESET);
