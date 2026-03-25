@@ -24,14 +24,28 @@ async function stepPublish() {
     execSync('git commit -m "CHORE: initial project setup"', { stdio: "inherit" });
   }
 
+  let hasRemote = false;
   try {
-    console.log(YELLOW + "🌐 Creating GitHub repo and pushing..." + RESET);
-    execSync(
-      "gh repo create " + state.projectName + " --public --source=. --remote=origin --push",
-      { stdio: "inherit" },
-    );
+    execSync("git remote get-url origin", { stdio: "pipe" });
+    hasRemote = true;
+  } catch (e) {
+    // no remote
+  }
 
+  try {
     const owner = execSync("gh api user --jq .login", { encoding: "utf8" }).trim();
+
+    if (hasRemote) {
+      console.log(YELLOW + "🌐 Remote already set — pushing to existing repo..." + RESET);
+      const branch = execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf8" }).trim();
+      execSync("git push -u origin " + branch, { stdio: "inherit" });
+    } else {
+      console.log(YELLOW + "🌐 Creating GitHub repo and pushing..." + RESET);
+      execSync(
+        "gh repo create " + state.projectName + " --public --source=. --remote=origin --push",
+        { stdio: "inherit" },
+      );
+    }
 
     try {
       execSync(
