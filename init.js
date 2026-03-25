@@ -70,7 +70,14 @@ async function main() {
     await stepAiSetup();
     await stepPublish();
   } else if (state.framework === "html") {
-    await stepScaffoldHtml();
+    const hasWorkflow = fs.existsSync(".github/workflows") &&
+      fs.readdirSync(".github/workflows").some(f => f.endsWith(".yml") || f.endsWith(".yaml"));
+    const alreadyInitialized = hasWorkflow || fs.existsSync(".prettierrc");
+    if (!alreadyInitialized) {
+      await stepScaffoldHtml();
+    } else {
+      console.log(GREEN + "🔍 Project already initialized — skipping scaffold." + RESET);
+    }
     await stepHtmlAiSetup();
     await stepPublish();
   } else {

@@ -200,7 +200,9 @@ If the project has no styles yet (file is empty or just a comment), write a clea
 
 ## Step 7 — Portfolio data
 
-Generate portfolio data for this project. Create two files:
+Check if `.portfolio-data/metadata.json` already exists. If it does, skip this step entirely.
+
+Otherwise, generate portfolio data for this project. Create two files:
 
 ### `.portfolio-data/metadata.json`
 

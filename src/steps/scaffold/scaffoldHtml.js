@@ -80,7 +80,9 @@ async function stepScaffoldHtml() {
   const workflowDir = path.resolve(".github/workflows");
   fs.mkdirSync(workflowDir, { recursive: true });
   track(path.resolve(".github"));
-  copyTemplate("html/deploy.yml", path.join(workflowDir, "deploy.yml"), {});
+  if (!fs.existsSync(path.join(workflowDir, "deploy.yml"))) {
+    copyTemplate("html/deploy.yml", path.join(workflowDir, "deploy.yml"), {});
+  }
 
   mergeGitignore(path.resolve(".gitignore"));
   if (!fs.existsSync(".prettierrc")) {
