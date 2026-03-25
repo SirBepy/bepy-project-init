@@ -4,6 +4,8 @@
 
 Built with: {{FRAMEWORK}}
 
+**Live:** `https://YOUR_USERNAME.github.io/{{PROJECT_NAME}}/`
+
 ## Development
 
 ```bash

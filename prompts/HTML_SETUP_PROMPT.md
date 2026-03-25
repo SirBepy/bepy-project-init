@@ -16,6 +16,64 @@ Usage: `node "{{SVG_TO_PNG_PATH}}" <input.svg> <output.png> <size>`
 
 ---
 
+## Pre-Step — Migrate legacy file structure
+
+Before doing anything else, check for and fix any of these legacy patterns:
+
+### 1. Move root-level JS/CSS into src/
+
+If `script.js` exists in the project root and `src/script.js` does NOT exist:
+- Move `script.js` to `src/script.js`
+- In `index.html`, update `<script src="script.js">` to `<script src="src/script.js">`
+
+If `style.css` or `styles.css` exists in the project root and `src/styles.css` does NOT exist:
+- Move the file to `src/styles.css`
+- In `index.html`, update the `<link>` stylesheet href to `src/styles.css`
+
+If neither case applies, skip this part.
+
+### 2. Remove build-info.js
+
+If `build-info.js` exists in the project root:
+- Delete it
+- Remove its `<script>` tag from `index.html` (it is replaced by the settings widget added in Step 4)
+
+### 3. Update the workflow
+
+Read `.github/workflows/deploy.yml`. If it doesn't match the template below, rewrite it to match exactly:
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+If the file already matches, skip this part.
+
+---
+
 ## Step 0 — Split JavaScript if needed
 
 Read `src/script.js`. If it is large (over ~150 lines) or contains one or more big inline data structures (arrays of objects, lookup tables, static config), split it:
@@ -50,10 +108,22 @@ If `src/favicon.png` already exists, skip this step.
 Check if `README.md` exists. If it doesn't, generate one:
 - Project name as heading
 - Short description (infer from the code and project name)
-- How to run: open `index.html` in a browser, or visit the GitHub Pages URL once deployed
-- Keep it short — this is a simple project
+- How to run: open `index.html` in a browser
+- A **Live** link to the GitHub Pages URL
 
-If `README.md` already exists, skip this step.
+To get the GitHub Pages URL:
+1. Run `git remote get-url origin`
+2. If it returns a URL like `https://github.com/username/repo.git` or `git@github.com:username/repo.git`, extract `username` and `repo` and construct: `https://username.github.io/repo/`
+3. If the remote is not set or the command fails, use the placeholder: `https://<username>.github.io/<repo-name>/`
+
+Include the live link in the README like:
+```
+**Live:** https://username.github.io/repo/
+```
+
+Keep the README short overall — this is a simple project.
+
+If `README.md` already exists, check if it has a live link. If it doesn't, add one using the same URL logic above.
 
 ---
 
