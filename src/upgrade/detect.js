@@ -67,12 +67,24 @@ function detectMisplaced() {
           misplaced.push(`assets/${name} → assets/scripts/${name}`);
         } else if (name.endsWith(".css") || name.endsWith(".scss")) {
           misplaced.push(`assets/${name} → assets/styles/${name}`);
+        } else if (name.endsWith(".ico")) {
+          misplaced.push(`assets/${name} → ${name}`);
         } else if (IMAGE_RE.test(name)) {
           misplaced.push(`assets/${name} → assets/images/${name}`);
         }
       } else if (entry.isDirectory()) {
         const dirName = entry.name;
-        if (dirName === "scripts" || dirName === "styles" || dirName === "images") continue;
+        // scan assets/images/ only for misplaced .ico files — everything else belongs there
+        if (dirName === "images") {
+          const imagesDir = path.join("assets", "images");
+          for (const file of fs.readdirSync(imagesDir, { withFileTypes: true })) {
+            if (file.isFile() && file.name.endsWith(".ico")) {
+              misplaced.push(`assets/images/${file.name} → ${file.name}`);
+            }
+          }
+          continue;
+        }
+        if (dirName === "scripts" || dirName === "styles") continue;
         const subDir = path.join("assets", dirName);
         for (const file of fs.readdirSync(subDir, { withFileTypes: true })) {
           if (!file.isFile()) continue;
@@ -81,6 +93,8 @@ function detectMisplaced() {
             misplaced.push(`assets/${dirName}/${name} → assets/scripts/${name}`);
           } else if (name.endsWith(".css") || name.endsWith(".scss")) {
             misplaced.push(`assets/${dirName}/${name} → assets/styles/${name}`);
+          } else if (name.endsWith(".ico")) {
+            misplaced.push(`assets/${dirName}/${name} → ${name}`);
           } else if (IMAGE_RE.test(name)) {
             misplaced.push(`assets/${dirName}/${name} → assets/images/${name}`);
           }
@@ -143,13 +157,35 @@ function migrateLooseFiles() {
           moveFile(src, "assets/scripts", "assets/" + name);
         } else if (name.endsWith(".css") || name.endsWith(".scss")) {
           moveFile(src, "assets/styles", "assets/" + name);
+        } else if (name.endsWith(".ico")) {
+          const dest = path.resolve(name);
+          if (!fs.existsSync(dest)) {
+            fs.renameSync(src, dest);
+            moves.push({ old: "assets/" + name, new: name });
+            console.log(YELLOW + `📁 Moved assets/${name} → ${name}` + RESET);
+          }
         } else if (IMAGE_RE.test(name)) {
           fs.mkdirSync(path.resolve("assets/images"), { recursive: true });
           moveFile(src, "assets/images", "assets/" + name);
         }
       } else if (entry.isDirectory()) {
         const dirName = entry.name;
-        if (dirName === "scripts" || dirName === "styles" || dirName === "images") continue;
+        // scan assets/images/ only for misplaced .ico files — everything else belongs there
+        if (dirName === "images") {
+          const imagesDir = path.resolve("assets", "images");
+          for (const file of fs.readdirSync(imagesDir, { withFileTypes: true })) {
+            if (!file.isFile() || !file.name.endsWith(".ico")) continue;
+            const src = path.join(imagesDir, file.name);
+            const dest = path.resolve(file.name);
+            if (!fs.existsSync(dest)) {
+              fs.renameSync(src, dest);
+              moves.push({ old: `assets/images/${file.name}`, new: file.name });
+              console.log(YELLOW + `📁 Moved assets/images/${file.name} → ${file.name}` + RESET);
+            }
+          }
+          continue;
+        }
+        if (dirName === "scripts" || dirName === "styles") continue;
         const subDir = path.resolve("assets", dirName);
         for (const file of fs.readdirSync(subDir, { withFileTypes: true })) {
           if (!file.isFile()) continue;
@@ -160,6 +196,13 @@ function migrateLooseFiles() {
             moveFile(src, "assets/scripts", relPath);
           } else if (name.endsWith(".css") || name.endsWith(".scss")) {
             moveFile(src, "assets/styles", relPath);
+          } else if (name.endsWith(".ico")) {
+            const dest = path.resolve(name);
+            if (!fs.existsSync(dest)) {
+              fs.renameSync(src, dest);
+              moves.push({ old: relPath, new: name });
+              console.log(YELLOW + `📁 Moved ${relPath} → ${name}` + RESET);
+            }
           } else if (IMAGE_RE.test(name)) {
             fs.mkdirSync(path.resolve("assets/images"), { recursive: true });
             moveFile(src, "assets/images", relPath);
