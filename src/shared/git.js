@@ -39,9 +39,9 @@ function runClaudeCli(promptFile) {
     return false;
   }
 
-  const result = spawnSync("claude", ["-p"], {
-    input: fs.readFileSync(promptPath),
-    stdio: ["pipe", "inherit", "inherit"],
+  const result = spawnSync(`claude -p < "${promptPath}"`, [], {
+    shell: true,
+    stdio: "inherit",
   });
   if (result.status !== 0) {
     console.log(RED + "❌ Claude CLI call failed." + RESET);

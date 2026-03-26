@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const state = require("../state");
@@ -22,10 +23,17 @@ async function stepHtmlAiSetup() {
     .replaceAll("{{SVG_TO_PNG_PATH}}", svgToPngPath);
 
   console.log(YELLOW + "🤖 Running AI setup..." + RESET);
-  const result = spawnSync("claude", ["--dangerously-skip-permissions", "-p"], {
-    input: promptContent,
-    stdio: ["pipe", "inherit", "inherit"],
-  });
+  const tempFile = path.join(os.tmpdir(), `claude-setup-${Date.now()}.md`);
+  fs.writeFileSync(tempFile, promptContent, "utf8");
+  let result;
+  try {
+    result = spawnSync(`claude --dangerously-skip-permissions -p < "${tempFile}"`, [], {
+      shell: true,
+      stdio: "inherit",
+    });
+  } finally {
+    fs.unlinkSync(tempFile);
+  }
 
   if (result.status === 0) {
     const committed = commitIfDirty("CHORE: AI project setup");
