@@ -1,4 +1,4 @@
-# bepy-styleguide
+# sirbepy-styleguide
 
 Joe's design system, hosted on CDN via GitHub Pages.
 
@@ -14,9 +14,9 @@ Joe's design system, hosted on CDN via GitHub Pages.
 Projects pull themes and widgets from this repo via jsDelivr:
 
 ```
-https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/themes/theme-void.css
-https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/settings.js
-https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/styleguide.css
+https://cdn.jsdelivr.net/gh/sirbepy/sirbepy-styleguide@main/themes/theme-void.css
+https://cdn.jsdelivr.net/gh/sirbepy/sirbepy-styleguide@main/widget/settings.js
+https://cdn.jsdelivr.net/gh/sirbepy/sirbepy-styleguide@main/styleguide.css
 ```
 
 ## Themes
@@ -33,7 +33,7 @@ All themes define CSS custom properties (`--color-primary`, `--font-heading`, `-
 ## Repo structure
 
 ```
-bepy-project-init/
+sirbepy-styleguide/
   index.html         - Styleguide explorer page
   styleguide.css     - Compiled component classes
   themes/            - Theme CSS files

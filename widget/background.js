@@ -6,7 +6,7 @@
   if (window.BEPY_BACKGROUND === false) return;
 
   var CDN =
-    "https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/";
+    "https://cdn.jsdelivr.net/gh/sirbepy/sirbepy-styleguide@main/widget/";
   var patternUrl = window.BEPY_BG_PATTERN || CDN + "background_pattern.svg";
 
   // ─── Styles ───────────────────────────────────────────────────────────────

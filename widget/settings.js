@@ -10,7 +10,7 @@
   const FEEDBACK_URL = "https://forms.gle/AGPabTu624aMaayE7";
   const FALLBACK_THEMES = ["void", "glacier", "cosmo", "nebula"];
   const LS_KEY = "tabs-labs-theme";
-  const CDN_THEMES = "https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/themes/";
+  const CDN_THEMES = "https://cdn.jsdelivr.net/gh/sirbepy/sirbepy-styleguide@main/themes/";
 
   // ─── DOM element references (set during renderPanel) ──────────────────────
 
@@ -342,7 +342,7 @@
       const err = document.createElement("div");
       err.className = "tl-theme-error";
       err.textContent =
-        "⚠ Themes not found. Copy manually from:\ngithub.com/sirbepy/bepy-project-init/themes";
+        "⚠ Themes not found. Copy manually from:\ngithub.com/sirbepy/sirbepy-styleguide/themes";
       elThemeBtns.appendChild(err);
       return;
     }

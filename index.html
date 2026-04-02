@@ -916,7 +916,7 @@
     (function () {
       var isCdn = new URLSearchParams(location.search).has('cdn');
       var base = isCdn
-        ? 'https://cdn.jsdelivr.net/gh/sirbepy/bepy-project-init@main/widget/'
+        ? 'https://cdn.jsdelivr.net/gh/sirbepy/sirbepy-styleguide@main/widget/'
         : 'widget/';
       if (!isCdn) window.BEPY_BG_PATTERN = 'widget/background_pattern.svg';
       ['background.js', 'settings.js'].forEach(function (file) {
