@@ -2,6 +2,7 @@
   // ─── Config ───────────────────────────────────────────────────────────────
   // Disable:        set window.BEPY_BACKGROUND = false before this script
   // Custom pattern: set window.BEPY_BG_PATTERN = 'path/to/pattern.svg' before this script
+  // Custom variants: set window.BEPY_BG_VARIANTS = [{ key, label, build }] before this script
 
   if (window.BEPY_BACKGROUND === false) return;
 
@@ -16,6 +17,15 @@
     pattern: { label: "Pattern", build: buildPattern },
     gradient: { label: "Gradient", build: buildGradient },
   };
+
+  // Register per-project custom variants
+  if (Array.isArray(window.BEPY_BG_VARIANTS)) {
+    window.BEPY_BG_VARIANTS.forEach(function (v) {
+      if (v.key && v.label && typeof v.build === "function") {
+        VARIANTS[v.key] = { label: v.label, build: v.build };
+      }
+    });
+  }
 
   var DEFAULT_VARIANT = "pattern";
 
