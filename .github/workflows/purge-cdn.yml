@@ -1,0 +1,22 @@
+name: Purge jsDelivr cache
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get changed files
+        id: changed
+        uses: jitterbit/get-changed-files@v1
+
+      - name: Purge jsDelivr cache
+        run: |
+          BASE="https://purge.jsdelivr.net/gh/${{ github.repository }}@main"
+          for file in ${{ steps.changed.outputs.all }}; do
+            echo "Purging: $file"
+            curl -s "${BASE}/${file}" | head -c 200
+            echo
+          done
