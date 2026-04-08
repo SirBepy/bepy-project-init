@@ -314,6 +314,7 @@
   // ─── 4. Panel open / close ────────────────────────────────────────────────
 
   function openPanel() {
+    renderBgButtons();
     elPanel.classList.add("tl-open");
     elBackdrop.classList.add("tl-open");
     if (window.innerWidth <= 480) {
@@ -438,7 +439,7 @@
   function renderModeButtons() {
     if (!elModeBtns) return;
     elModeBtns.innerHTML = "";
-    var active = localStorage.getItem(LS_MODE_KEY) || "dark";
+    var active = localStorage.getItem(LS_MODE_KEY) || "auto";
     var modes = [
       { key: "dark", label: "Dark" },
       { key: "light", label: "Light" },
@@ -479,7 +480,7 @@
   function initModeListener() {
     _mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
     _mediaQuery.addEventListener("change", function () {
-      if ((localStorage.getItem(LS_MODE_KEY) || "dark") === "auto") {
+      if ((localStorage.getItem(LS_MODE_KEY) || "auto") === "auto") {
         applyMode("auto");
       }
     });
@@ -526,7 +527,7 @@
       .catch(function () {});
 
     // Restore saved mode
-    var savedMode = localStorage.getItem(LS_MODE_KEY) || "dark";
+    var savedMode = localStorage.getItem(LS_MODE_KEY) || "auto";
     var resolved = getResolvedMode(savedMode);
     if (resolved === "light") {
       document.documentElement.setAttribute("data-mode", "light");
