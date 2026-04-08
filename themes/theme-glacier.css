@@ -27,14 +27,14 @@
   --color-primary-rgb: 59, 130, 246;
   --color-secondary: #60a5fa;
   --color-accent: #0ea5e9;
-  --color-background: #f6f8fa;
-  --color-surface: #ffffff;
-  --color-surface-alt: #edf2f7;
+  --color-background: #eaeff4;
+  --color-surface: #f2f5f9;
+  --color-surface-alt: #e6ecf2;
   --color-text: #1a2030;
-  --color-text-muted: #6b7b8d;
-  --color-border: #d0d7de;
+  --color-text-muted: #5e6e82;
+  --color-border: #c8d0d8;
   --color-success: #1a9e3f;
   --color-info: #3b82f6;
-  --badge-tech-bg: #e8eef4;
+  --badge-tech-bg: #dfe6ee;
   --shadow-card: 0 4px 16px rgba(50,80,120,0.08);
 }
