@@ -305,8 +305,8 @@ hr {
   border: 1px solid var(--color-primary);
 }
 .btn-outline:hover {
-  background: var(--color-primary);
-  color: var(--color-background);
+  background: transparent;
+  color: var(--color-primary);
   transform: translateY(-1px);
   box-shadow:
     0 4px 14px rgba(var(--color-primary-rgb, 157,125,252), 0.35);
@@ -396,6 +396,131 @@ select.input {
 textarea.input {
   resize: vertical;
   min-height: 80px;
+}
+
+input[type="number"].input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"].input::-webkit-outer-spin-button,
+input[type="number"].input::-webkit-inner-spin-button {
+  -webkit-appearance: inner-spin-button;
+  appearance: auto;
+  opacity: 1;
+  height: 100%;
+  margin: 0;
+  margin-right: -1rem;
+  padding: 0 6px;
+  cursor: pointer;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+}
+
+/* ─── Tooltip ─────────────────────────────────────────────────────────────── */
+.tooltip-trigger {
+  position: relative;
+}
+
+.tooltip-trigger:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip {
+  position: absolute;
+  background-color: var(--color-surface-alt);
+  color: var(--color-text);
+  padding: 0.75rem;
+  border-radius: var(--radius-card);
+  width: 230px;
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  border: 1px solid var(--color-border);
+  border-top-color: rgba(255,255,255,0.12);
+  border-bottom-color: rgba(0,0,0,0.4);
+  box-shadow:
+    0 4px 16px rgba(0,0,0,0.4),
+    0 2px 6px rgba(0,0,0,0.25),
+    inset 0 1px 1px 0 rgba(255,255,255,0.09),
+    inset 0 -1px 1px 0 rgba(0,0,0,0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.tooltip p {
+  margin: 0.5rem 0;
+  font-size: inherit;
+}
+.tooltip p:first-child { margin-top: 0; }
+.tooltip p:last-child { margin-bottom: 0; }
+
+/* Positioning variants */
+.tooltip-right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip-left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip-top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-bottom {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ─── Toggle button ───────────────────────────────────────────────────────── */
+.btn-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 6px;
+  border-radius: var(--radius-badge);
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+  font-family: var(--font-body);
+  font-weight: 600;
+  gap: 0.5rem;
+}
+
+.btn-toggle:hover {
+  opacity: 1;
+  background-color: var(--color-surface-alt);
+}
+
+.btn-toggle.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  opacity: 0.8;
+}
+
+.btn-toggle.active:hover {
+  opacity: 1;
+  background-color: var(--color-surface-alt);
 }
 
 /* ─── Underline hover link ─────────────────────────────────────────────────── */
