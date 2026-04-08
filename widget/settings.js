@@ -16,7 +16,7 @@
   // ─── DOM element references (set during renderPanel) ──────────────────────
 
   let elPanel, elBackdrop, elCogBtn, elCloseBtn;
-  let elAppName, elAppDesc, elBuildTime, elThemeBtns, elModeBtns;
+  let elAppName, elAppDesc, elBuildTime, elThemeBtns, elModeBtns, elBgBtns;
   let _savedBodyOverflow = null;
   let _mediaQuery = null;
 
@@ -26,15 +26,6 @@
     const css = `
       .tl-cog {
         position: fixed; top: 1rem; right: 1rem; z-index: 9999;
-        width: 40px; height: 40px; border-radius: 50%;
-        background: var(--color-surface, #1e1d2b);
-        border: 1px solid var(--color-border, #2d2c44);
-        color: var(--color-text, #e2e0f0);
-        cursor: pointer; font-size: 18px;
-        display: flex; align-items: center; justify-content: center;
-      }
-      .tl-cog:hover {
-        background: var(--color-primary, #9d7dfc); color: #fff;
       }
       .tl-backdrop {
         position: fixed; inset: 0; z-index: 9999;
@@ -69,13 +60,7 @@
         color: var(--color-text, #e2e0f0); font-size: 0.95rem; font-weight: 600;
       }
       .tl-close-btn {
-        background: transparent; border: none; cursor: pointer;
-        border-radius: 50%; width: 32px; height: 32px;
-        display: flex; align-items: center; justify-content: center;
-        color: var(--color-text, #e2e0f0); font-size: 16px;
-      }
-      .tl-close-btn:hover {
-        background: var(--color-primary, #9d7dfc); color: #fff;
+        opacity: 0.7;
       }
       .tl-section-label {
         text-transform: uppercase; font-size: 0.7rem;
@@ -121,6 +106,19 @@
       }
       .tl-about-links { display: flex; gap: 0.4rem; }
       .tl-feedback-text { font-size: 0.8rem; color: var(--color-text-muted, #6b6990); }
+      .tl-bg-btns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .tl-bg-btn {
+        background: var(--color-surface-alt, #242334);
+        border: 1px solid var(--color-border, #2d2c44);
+        border-radius: var(--radius-badge, 6px);
+        padding: 0.3rem 0.7rem; font-size: 0.8rem;
+        cursor: pointer; color: var(--color-text, #e2e0f0);
+      }
+      .tl-bg-btn:hover { filter: brightness(1.2); }
+      .tl-bg-btn.tl-active {
+        border-color: var(--color-primary, #9d7dfc);
+        color: var(--color-primary, #9d7dfc);
+      }
       .tl-mode-btns { display: flex; gap: 0.4rem; }
       .tl-mode-btn {
         background: var(--color-surface-alt, #242334);
@@ -165,11 +163,20 @@
     elBackdrop.className = "tl-backdrop";
     document.body.appendChild(elBackdrop);
 
+    // Load Phosphor Icons if not already present
+    if (!document.querySelector('script[src*="phosphor-icons"]')) {
+      var phosphorScript = document.createElement("script");
+      phosphorScript.src = "https://unpkg.com/@phosphor-icons/web";
+      document.head.appendChild(phosphorScript);
+    }
+
     // Cog button
     elCogBtn = document.createElement("button");
-    elCogBtn.className = "tl-cog";
+    elCogBtn.className = "tl-cog btn-icon";
     elCogBtn.type = "button";
-    elCogBtn.textContent = "⚙️";
+    var cogIcon = document.createElement("i");
+    cogIcon.className = "ph ph-gear";
+    elCogBtn.appendChild(cogIcon);
     document.body.appendChild(elCogBtn);
 
     // Panel
@@ -180,11 +187,13 @@
     const header = document.createElement("div");
     header.className = "tl-panel-header";
     const headerTitle = document.createElement("span");
-    headerTitle.textContent = "⚙️ Settings";
+    headerTitle.textContent = "Settings";
     elCloseBtn = document.createElement("button");
-    elCloseBtn.className = "tl-close-btn";
+    elCloseBtn.className = "tl-close-btn btn-icon btn-icon-sm";
     elCloseBtn.type = "button";
-    elCloseBtn.textContent = "×";
+    var closeIcon = document.createElement("i");
+    closeIcon.className = "ph ph-x";
+    elCloseBtn.appendChild(closeIcon);
     header.appendChild(headerTitle);
     header.appendChild(elCloseBtn);
     elPanel.appendChild(header);
@@ -229,6 +238,18 @@
     elPanel.appendChild(elModeBtns);
 
     renderModeButtons();
+
+    // BACKGROUND section
+    const bgLabel = document.createElement("div");
+    bgLabel.className = "tl-section-label";
+    bgLabel.textContent = "BACKGROUND";
+    elPanel.appendChild(bgLabel);
+
+    elBgBtns = document.createElement("div");
+    elBgBtns.className = "tl-bg-btns";
+    elPanel.appendChild(elBgBtns);
+
+    renderBgButtons();
 
     // ABOUT section
     const aboutLabel = document.createElement("div");
@@ -433,6 +454,25 @@
         applyMode(m.key);
       });
       elModeBtns.appendChild(btn);
+    });
+  }
+
+  function renderBgButtons() {
+    if (!elBgBtns || !window.BEPY_BG) return;
+    elBgBtns.innerHTML = "";
+    var variants = window.BEPY_BG.getVariants();
+    var active = window.BEPY_BG.getActive();
+    variants.forEach(function (v) {
+      var btn = document.createElement("button");
+      btn.className = "tl-bg-btn";
+      btn.type = "button";
+      btn.textContent = v.key === active ? v.label + " \u2713" : v.label;
+      if (v.key === active) btn.classList.add("tl-active");
+      btn.addEventListener("click", function () {
+        window.BEPY_BG.set(v.key);
+        renderBgButtons();
+      });
+      elBgBtns.appendChild(btn);
     });
   }
 
